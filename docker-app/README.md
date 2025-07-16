@@ -176,6 +176,8 @@ Use the threshold slider to adjust detection sensitivity (0.1 to 0.9):
 - No data is sent to external servers
 - Docker image uses non-root user (nginx)
 - Security headers are configured
+- Regular security scans via GitHub Actions
+- All dependencies updated to latest secure versions
 
 ## ⚡ Performance
 
