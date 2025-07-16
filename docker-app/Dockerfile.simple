@@ -1,0 +1,61 @@
+# Simple Dockerfile for faster building and testing
+FROM node:18-alpine
+
+# Install basic dependencies
+RUN apk add --no-cache curl
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production --quiet
+
+# Copy source code and build script
+COPY src ./src
+COPY public ./public
+COPY download-models.js ./
+
+# Download models and create a simple dist directory
+RUN npm run build:simple && \
+    mkdir -p dist && \
+    cp -r src/* dist/ && \
+    cp -r public/* dist/
+
+# Create simple server
+RUN cat > server.js << 'EOF'
+const express = require('express');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+// Serve static files from dist
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Serve index.html for all other routes (SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
+EOF
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Start the server
+CMD ["node", "server.js"]

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection App - Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .metric-unit {
+            font-size: 1rem;
+            color: #64748b;
+            margin-left: 4px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-healthy { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+        
+        .logs-section {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+            margin-top: 2rem;
+        }
+        
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .logs-content {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .refresh-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #2563eb;
+        }
+        
+        .chart-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+            margin-top: 2rem;
+            height: 300px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .updating {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Face Detection Monitoring Dashboard</h1>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">
+                    <span class="status-indicator status-healthy"></span>
+                    Application Status
+                </div>
+                <div class="metric-value" id="app-status">Healthy</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Uptime</div>
+                <div class="metric-value">
+                    <span id="uptime">0</span>
+                    <span class="metric-unit">hrs</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Request Rate</div>
+                <div class="metric-value">
+                    <span id="request-rate">0</span>
+                    <span class="metric-unit">req/s</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Response Time</div>
+                <div class="metric-value">
+                    <span id="response-time">0</span>
+                    <span class="metric-unit">ms</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Active Connections</div>
+                <div class="metric-value" id="connections">0</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">Memory Usage</div>
+                <div class="metric-value">
+                    <span id="memory">0</span>
+                    <span class="metric-unit">MB</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3 style="margin-bottom: 1rem;">Performance Trends</h3>
+            <canvas id="performance-chart"></canvas>
+        </div>
+        
+        <div class="logs-section">
+            <div class="logs-header">
+                <h3>Recent Activity</h3>
+                <button class="refresh-btn" onclick="refreshMetrics()">Refresh</button>
+            </div>
+            <div class="logs-content" id="logs">
+                <div class="log-entry">[2024-01-01 00:00:00] Application started</div>
+                <div class="log-entry">[2024-01-01 00:00:01] Health check passed</div>
+                <div class="log-entry">[2024-01-01 00:00:02] Monitoring initialized</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simulated metrics (in production, these would come from real endpoints)
+        let startTime = Date.now();
+        let requestCount = 0;
+        
+        function updateMetrics() {
+            // Update uptime
+            const uptime = Math.floor((Date.now() - startTime) / 1000 / 3600);
+            document.getElementById('uptime').textContent = uptime;
+            
+            // Simulate other metrics
+            document.getElementById('request-rate').textContent = Math.floor(Math.random() * 50 + 10);
+            document.getElementById('response-time').textContent = Math.floor(Math.random() * 100 + 50);
+            document.getElementById('connections').textContent = Math.floor(Math.random() * 20 + 5);
+            document.getElementById('memory').textContent = Math.floor(Math.random() * 200 + 300);
+            
+            // Add random log entry
+            if (Math.random() > 0.7) {
+                addLogEntry();
+            }
+        }
+        
+        function addLogEntry() {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
+            const messages = [
+                'Face detection completed successfully',
+                'Model loaded from cache',
+                'New user session started',
+                'Performance metrics updated',
+                'Health check passed',
+                'Lite mode activated',
+                'Pro mode processing initiated'
+            ];
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${timestamp}] ${message}`;
+            
+            logs.insertBefore(entry, logs.firstChild);
+            
+            // Keep only last 10 entries
+            while (logs.children.length > 10) {
+                logs.removeChild(logs.lastChild);
+            }
+        }
+        
+        function refreshMetrics() {
+            const cards = document.querySelectorAll('.metric-card');
+            cards.forEach(card => card.classList.add('updating'));
+            
+            updateMetrics();
+            
+            setTimeout(() => {
+                cards.forEach(card => card.classList.remove('updating'));
+            }, 500);
+        }
+        
+        // Check real health endpoint
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const text = await response.text();
+                const statusEl = document.getElementById('app-status');
+                const indicator = statusEl.previousElementSibling.querySelector('.status-indicator');
+                
+                if (response.ok) {
+                    statusEl.textContent = 'Healthy';
+                    indicator.className = 'status-indicator status-healthy';
+                } else {
+                    statusEl.textContent = 'Error';
+                    indicator.className = 'status-indicator status-error';
+                }
+            } catch (error) {
+                console.error('Health check failed:', error);
+            }
+        }
+        
+        // Initialize and update periodically
+        updateMetrics();
+        checkHealth();
+        setInterval(updateMetrics, 5000);
+        setInterval(checkHealth, 30000);
+        
+        // Simple performance chart using Canvas
+        const canvas = document.getElementById('performance-chart');
+        const ctx = canvas.getContext('2d');
+        const performanceData = [];
+        
+        function drawChart() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height - 40;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            
+            if (performanceData.length > 1) {
+                ctx.beginPath();
+                performanceData.forEach((value, index) => {
+                    const x = (index / (performanceData.length - 1)) * canvas.width;
+                    const y = canvas.height - (value / 100) * canvas.height;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+            }
+        }
+        
+        function updateChart() {
+            performanceData.push(Math.random() * 80 + 20);
+            if (performanceData.length > 50) {
+                performanceData.shift();
+            }
+            drawChart();
+        }
+        
+        setInterval(updateChart, 1000);
+        window.addEventListener('resize', drawChart);
+    </script>
+</body>
+</html>

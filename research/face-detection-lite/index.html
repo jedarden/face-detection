@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection Lite - Real-time Webcam Face Detection</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Face Detection Lite</h1>
+            <p>Real-time face detection using your webcam and local compute</p>
+        </header>
+
+        <div class="controls">
+            <button id="startBtn" class="btn btn-primary">Start Detection</button>
+            <button id="stopBtn" class="btn btn-secondary" disabled>Stop Detection</button>
+            <button id="switchCameraBtn" class="btn btn-secondary">Switch Camera</button>
+            
+            <div class="model-selector">
+                <label for="modelSelect">Detection Model:</label>
+                <select id="modelSelect">
+                    <option value="tiny" selected>Tiny Face Detector (Fast, 190KB)</option>
+                    <option value="ssd">SSD MobileNet (Accurate, 5.4MB)</option>
+                </select>
+            </div>
+
+            <div class="options">
+                <label>
+                    <input type="checkbox" id="showLandmarks" />
+                    Show Landmarks
+                </label>
+                <label>
+                    <input type="checkbox" id="showExpressions" />
+                    Show Expressions
+                </label>
+                <label>
+                    <input type="checkbox" id="showAgeGender" />
+                    Show Age & Gender
+                </label>
+            </div>
+        </div>
+
+        <div class="video-container">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="overlay"></canvas>
+            <div id="loader" class="loader">Loading models...</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">FPS:</span>
+                <span id="fps" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Faces Detected:</span>
+                <span id="faceCount" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Processing Time:</span>
+                <span id="processTime" class="stat-value">0ms</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Model:</span>
+                <span id="currentModel" class="stat-value">Tiny Face</span>
+            </div>
+        </div>
+
+        <div class="info">
+            <h2>How it works</h2>
+            <p>This demo uses face-api.js, a JavaScript face detection library built on TensorFlow.js. It runs entirely in your browser using WebGL acceleration - no data is sent to any server.</p>
+            
+            <h3>Features:</h3>
+            <ul>
+                <li>Real-time face detection with bounding boxes</li>
+                <li>Optional facial landmark detection (68 points)</li>
+                <li>Expression recognition (happy, sad, angry, etc.)</li>
+                <li>Age and gender estimation</li>
+                <li>Multiple camera support</li>
+                <li>Two detection models for speed vs accuracy trade-off</li>
+            </ul>
+
+            <h3>Privacy:</h3>
+            <p>All processing happens locally in your browser. No images or data leave your device.</p>
+        </div>
+    </div>
+
+    <!-- face-api.js -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <!-- Our application -->
+    <script src="src/app.js"></script>
+</body>
+</html>

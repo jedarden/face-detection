@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection Performance Comparison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .detector {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .video-container {
+            position: relative;
+            margin: 10px 0;
+        }
+        video, canvas {
+            width: 100%;
+            max-width: 400px;
+            display: block;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .stats {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Face Detection Performance Comparison</h1>
+    <p>Compare the performance of Tiny Face Detector vs SSD MobileNet in real-time.</p>
+    
+    <div class="controls">
+        <button id="startBtn">Start Comparison</button>
+        <button id="stopBtn" disabled>Stop</button>
+    </div>
+    
+    <div class="container">
+        <div class="detector">
+            <h2>Tiny Face Detector</h2>
+            <p>Model size: ~190KB | Optimized for speed</p>
+            <div class="video-container">
+                <video id="video1" autoplay muted></video>
+                <canvas id="canvas1"></canvas>
+            </div>
+            <div class="stats" id="stats1">
+                FPS: <span id="fps1">0</span> | 
+                Process Time: <span id="time1">0</span>ms | 
+                Faces: <span id="faces1">0</span>
+            </div>
+        </div>
+        
+        <div class="detector">
+            <h2>SSD MobileNet V1</h2>
+            <p>Model size: ~5.4MB | Optimized for accuracy</p>
+            <div class="video-container">
+                <video id="video2" autoplay muted></video>
+                <canvas id="canvas2"></canvas>
+            </div>
+            <div class="stats" id="stats2">
+                FPS: <span id="fps2">0</span> | 
+                Process Time: <span id="time2">0</span>ms | 
+                Faces: <span id="faces2">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script>
+        class PerformanceComparison {
+            constructor() {
+                this.isRunning = false;
+                this.stream = null;
+                this.stats = {
+                    tiny: { fps: 0, frameCount: 0, lastTime: performance.now() },
+                    ssd: { fps: 0, frameCount: 0, lastTime: performance.now() }
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                // Load models
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(
+                        'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+                    ),
+                    faceapi.nets.ssdMobilenetv1.loadFromUri(
+                        'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+                    )
+                ]);
+                
+                // Setup event listeners
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+            }
+            
+            async start() {
+                // Get camera stream
+                this.stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                
+                // Setup both videos
+                const video1 = document.getElementById('video1');
+                const video2 = document.getElementById('video2');
+                video1.srcObject = this.stream;
+                video2.srcObject = this.stream.clone();
+                
+                // Update UI
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                this.isRunning = true;
+                
+                // Start detection on both
+                video1.addEventListener('play', () => {
+                    this.detectWithTiny(video1, 'canvas1', 'tiny');
+                });
+                
+                video2.addEventListener('play', () => {
+                    this.detectWithSSD(video2, 'canvas2', 'ssd');
+                });
+            }
+            
+            async detectWithTiny(video, canvasId, statsKey) {
+                if (!this.isRunning) return;
+                
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                const startTime = performance.now();
+                
+                // Detect faces
+                const detections = await faceapi.detectAllFaces(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions({
+                        inputSize: 416,
+                        scoreThreshold: 0.5
+                    })
+                );
+                
+                const processTime = performance.now() - startTime;
+                
+                // Draw detections
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                detections.forEach(det => {
+                    const box = det.box;
+                    ctx.strokeStyle = '#00ff00';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    
+                    // Draw score
+                    ctx.fillStyle = '#00ff00';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(
+                        `${Math.round(det.score * 100)}%`,
+                        box.x,
+                        box.y - 5
+                    );
+                });
+                
+                // Update stats
+                this.updateStats('1', statsKey, detections.length, processTime);
+                
+                // Continue
+                requestAnimationFrame(() => this.detectWithTiny(video, canvasId, statsKey));
+            }
+            
+            async detectWithSSD(video, canvasId, statsKey) {
+                if (!this.isRunning) return;
+                
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                const startTime = performance.now();
+                
+                // Detect faces
+                const detections = await faceapi.detectAllFaces(
+                    video,
+                    new faceapi.SsdMobilenetv1Options({
+                        minConfidence: 0.5
+                    })
+                );
+                
+                const processTime = performance.now() - startTime;
+                
+                // Draw detections
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                detections.forEach(det => {
+                    const box = det.box;
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    
+                    // Draw score
+                    ctx.fillStyle = '#ff0000';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(
+                        `${Math.round(det.score * 100)}%`,
+                        box.x,
+                        box.y - 5
+                    );
+                });
+                
+                // Update stats
+                this.updateStats('2', statsKey, detections.length, processTime);
+                
+                // Continue
+                requestAnimationFrame(() => this.detectWithSSD(video, canvasId, statsKey));
+            }
+            
+            updateStats(suffix, statsKey, faceCount, processTime) {
+                // Update process time and face count
+                document.getElementById(`time${suffix}`).textContent = Math.round(processTime);
+                document.getElementById(`faces${suffix}`).textContent = faceCount;
+                
+                // Calculate FPS
+                const stats = this.stats[statsKey];
+                stats.frameCount++;
+                const currentTime = performance.now();
+                const deltaTime = currentTime - stats.lastTime;
+                
+                if (deltaTime >= 1000) {
+                    stats.fps = Math.round((stats.frameCount * 1000) / deltaTime);
+                    document.getElementById(`fps${suffix}`).textContent = stats.fps;
+                    stats.frameCount = 0;
+                    stats.lastTime = currentTime;
+                }
+            }
+            
+            stop() {
+                this.isRunning = false;
+                
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    const video2Stream = document.getElementById('video2').srcObject;
+                    if (video2Stream) {
+                        video2Stream.getTracks().forEach(track => track.stop());
+                    }
+                }
+                
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+        
+        // Initialize
+        new PerformanceComparison();
+    </script>
+</body>
+</html>

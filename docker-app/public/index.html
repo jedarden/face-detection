@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Face Detection Application using face-api.js">
+    <title>Face Detection App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div class="loading">
+            <h2>Loading Face Detection App...</h2>
+            <p>Please wait while we load the models.</p>
+        </div>
+    </div>
+    
+    <!-- Load face-api.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    
+    <!-- Load our application script -->
+    <script src="app.js"></script>
+    
+    <noscript>
+        <p>This application requires JavaScript to be enabled.</p>
+    </noscript>
+</body>
+</html>

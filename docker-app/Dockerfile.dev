@@ -1,0 +1,29 @@
+# Development Dockerfile
+FROM node:18-alpine
+
+# Install additional tools for development
+RUN apk add --no-cache \
+    git \
+    bash \
+    curl
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev)
+RUN npm ci
+
+# Copy application files
+COPY . .
+
+# Expose development server port
+EXPOSE 3000
+
+# Expose webpack-dev-server websocket port for hot reload
+EXPOSE 35729
+
+# Default command
+CMD ["npm", "run", "dev"]
