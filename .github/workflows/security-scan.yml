@@ -63,10 +63,16 @@ jobs:
         # Check for security best practices
         docker run --rm -i hadolint/hadolint < docker-app/Dockerfile || true
         
-        # Check for known vulnerabilities
-        docker run --rm aquasec/trivy:latest image \
+        # Export the image to a tar file for Trivy to scan
+        docker save face-detection-security-scan:latest -o image.tar
+        
+        # Check for known vulnerabilities using the tar file
+        docker run --rm -v $PWD:/workspace aquasec/trivy:latest image \
           --severity HIGH,CRITICAL \
-          face-detection-security-scan:latest
+          --input /workspace/image.tar
+        
+        # Clean up
+        rm -f image.tar
         
         echo "✅ Security scan completed!"
 
