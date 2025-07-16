@@ -65,8 +65,14 @@ python3 -m http.server 8000
 
 #### From GitHub Container Registry (Recommended)
 ```bash
+# Pull latest release
 docker pull ghcr.io/jedarden/face-detection:latest
-docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:latest
+
+# Or pull specific version
+docker pull ghcr.io/jedarden/face-detection:v0.0.1
+
+# Run container
+docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:v0.0.1
 # Open http://localhost:8080
 ```
 
@@ -113,7 +119,8 @@ Each subdirectory contains detailed documentation:
 Pre-built Docker images are automatically published to GitHub Container Registry:
 
 ### 🏷️ Available Tags
-- `latest` - Latest stable release
+- `latest` - Latest stable release (v0.0.1)
+- `v0.0.1` - First stable release
 - `v{version}` - Specific version releases
 - `main` - Main branch builds
 - `dev-{branch}` - Development branch builds

@@ -28,17 +28,25 @@ The repository includes three automated workflows for Docker image management:
 
 #### Pull Latest Image
 ```bash
+# Pull latest release (v0.0.1)
 docker pull ghcr.io/jedarden/face-detection:latest
+
+# Or pull specific version
+docker pull ghcr.io/jedarden/face-detection:v0.0.1
 ```
 
 #### Run Container
 ```bash
+# Run latest release
 docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:latest
+
+# Or run specific version
+docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:v0.0.1
 ```
 
 #### Pull Specific Version
 ```bash
-docker pull ghcr.io/jedarden/face-detection:v1.0.0
+docker pull ghcr.io/jedarden/face-detection:v0.0.1
 ```
 
 ## 🔧 Development Workflow
