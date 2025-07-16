@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+build
+.cache
+# Don't ignore dist for simple build
+# dist
+
+# Development files
+.git
+.gitignore
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+coverage
+.nyc_output
+test-results
+junit.xml
+*.test.js
+*.spec.js
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Scripts (will be copied separately)
+scripts/
+
+# SSL certificates (mounted as volume)
+ssl/
+
+# Logs
+*.log
+logs/
+
+# Docker files (when building)
+Dockerfile*
+docker-compose*.yml
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp

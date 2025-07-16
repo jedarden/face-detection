@@ -1,0 +1,115 @@
+services:
+  # Production service
+  face-detection-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+      args:
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${VCS_REF:-$(git rev-parse --short HEAD)}
+    image: face-detection-app:latest
+    container_name: face-detection-container
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+      - "${HTTPS_PORT:-8443}:8443"
+    environment:
+      - NODE_ENV=production
+      - APP_VERSION=${APP_VERSION:-1.0.0}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - ENABLE_METRICS=${ENABLE_METRICS:-true}
+      - MODEL_CACHE_DIR=/usr/share/nginx/html/model-cache
+      - MAX_UPLOAD_SIZE=${MAX_UPLOAD_SIZE:-20M}
+    volumes:
+      # Model cache volume for persistence
+      - face-detection-models:/usr/share/nginx/html/model-cache
+      # Logs volume for analysis
+      - face-detection-logs:/var/log/nginx
+      # SSL certificates (for custom certs in production)
+      - ./ssl:/etc/nginx/ssl:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/health-check"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    labels:
+      - "com.face-detection.description=Face Detection Application"
+      - "com.face-detection.version=${APP_VERSION:-1.0.0}"
+    networks:
+      - face-detection-network
+
+  # Development service
+  face-detection-dev:
+    profiles: ["development"]
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: face-detection-app:dev
+    container_name: face-detection-dev
+    ports:
+      - "${DEV_PORT:-3000}:3000"
+      - "35729:35729"  # LiveReload port
+    volumes:
+      - ./src:/app/src:delegated
+      - ./public:/app/public:delegated
+      - ./tests:/app/tests:delegated
+      - ./package.json:/app/package.json:ro
+      - ./webpack.dev.js:/app/webpack.dev.js:ro
+      - ./.babelrc:/app/.babelrc:ro
+      - /app/node_modules  # Prevent overwriting node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # For file watching in Docker
+      - WEBPACK_DEV_SERVER_HOST=0.0.0.0
+      - LOG_LEVEL=debug
+    command: npm run dev
+    networks:
+      - face-detection-network
+
+  # Test runner service
+  face-detection-test:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: face-detection-app:test
+    container_name: face-detection-test
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./coverage:/app/coverage
+      - ./test-results:/app/test-results
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    command: npm run test:ci
+    networks:
+      - face-detection-network
+
+# Volumes for persistent data
+volumes:
+  face-detection-models:
+    driver: local
+    labels:
+      - "com.face-detection.description=TensorFlow.js model cache"
+  face-detection-logs:
+    driver: local
+    labels:
+      - "com.face-detection.description=Application logs"
+
+# Network configuration
+networks:
+  face-detection-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,15 @@
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "timestamp": "dynamic",
+  "services": {
+    "nginx": "running",
+    "face-detection": "available"
+  },
+  "features": {
+    "lite_mode": true,
+    "pro_mode": true,
+    "tensorflow_js": true,
+    "face_api_js": true
+  }
+}

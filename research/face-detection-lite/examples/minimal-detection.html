@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Face Detection Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #videoContainer {
+            position: relative;
+            display: inline-block;
+        }
+        video, canvas {
+            display: block;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Minimal Face Detection Example</h1>
+    <p>This is a bare-bones example showing just the essential code for face detection.</p>
+    
+    <button id="startBtn">Start Detection</button>
+    <div id="videoContainer">
+        <video id="video" width="640" height="480" autoplay muted></video>
+        <canvas id="overlay"></canvas>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script>
+        // Minimal face detection implementation
+        async function startApp() {
+            // Load the tiny face detector model
+            await faceapi.nets.tinyFaceDetector.loadFromUri(
+                'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+            );
+            
+            // Get video element
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('overlay');
+            const ctx = canvas.getContext('2d');
+            
+            // Start video
+            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+            video.srcObject = stream;
+            
+            // Wait for video to load
+            video.addEventListener('play', () => {
+                // Set canvas size
+                canvas.width = video.width;
+                canvas.height = video.height;
+                
+                // Detection loop
+                async function detect() {
+                    // Detect faces
+                    const detections = await faceapi.detectAllFaces(
+                        video,
+                        new faceapi.TinyFaceDetectorOptions()
+                    );
+                    
+                    // Clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw boxes
+                    detections.forEach(detection => {
+                        const box = detection.box;
+                        ctx.strokeStyle = '#00ff00';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    });
+                    
+                    // Loop
+                    requestAnimationFrame(detect);
+                }
+                
+                detect();
+            });
+        }
+        
+        // Start on button click
+        document.getElementById('startBtn').addEventListener('click', startApp);
+    </script>
+</body>
+</html>
