@@ -150,53 +150,50 @@ This application was built through an iterative development process using AI-ass
 1. **📁 Project Structure**: 
    > "Create a new folder named face-detection-repo/"
 
-2. **🛠️ YouTube Tools**: 
-   > "Create a tools/ folder and put youtube-transcript-api tools in it."
-
-3. **🔬 Research Phase**: 
+2. **🔬 Research Phase**: 
    > "conduct deep research about basic face detection, the kind where a bounding box is put around the detected face. Use github repos, academic papers, youtube transcripts, and any other web sources to create a webpage that can demonstrate this technology using a device's webcam and the local compute resources. Put the results into face-detection-repo/research/face-detection-lite"
 
 ### 🎯 Core Application Development
-4. **🐳 Docker Application**: 
+3. **🐳 Docker Application**: 
    > "Based on the research in face-detection-repo/research build a docker image which exposes a single port and serves a web application which uses the user's camera to power two levels of face detection. Lite shows a bounding box around the face. Pro shows an overlay over the face with markers showing various landmarks. Use test driven development to build this application. If stuck, conduct deep research into the problem and the solutions. Keep iterating until the application is complete and passes all tests. Once complete, update the documentation to summarize what was built. Spawn up to 5 agents to work on this application concurrently."
 
 ### 🚀 Feature Enhancements
-5. **📹 Multi-Camera Support**: 
+4. **📹 Multi-Camera Support**: 
    > "Update the application to allow the user to select from multiple cameras--provided there are multiple cameras to select from."
 
-6. **🔧 Docker Fixes**: 
+5. **🔧 Docker Fixes**: 
    > "Fix this issue. vscode ➜ /workspaces/face-detection/face-detection-repo/docker-app (workspace/basic) $ docker compose logs -f WARN[0000] /workspaces/face-detection/face-detection-repo/docker-app/docker-compose.yml: the attribute 'version' is obsolete, it will be ignored, please remove it to avoid potential confusion healthcheck.test must start either by 'CMD', 'CMD-SHELL' or 'NONE'"
 
-7. **⚡ Build Performance**: 
+6. **⚡ Build Performance**: 
    > "Seems the build process is hung. [+] Building 239.0s (18/23) ..."
 
-8. **🔄 Loading Issues**: 
+7. **🔄 Loading Issues**: 
    > "Loading Face Detection App... Please wait while we load the models. nothing else shows"
 
 ### 🎨 Visual & UX Improvements
-9. **🎯 Visual Fixes**: 
+8. **🎯 Visual Fixes**: 
    > "The percentage in the lite bounding box is reverse. It's probably because the camera image is also reversed. Tune the bounding box to minimize around the face instead of showing a broader edge."
 
-10. **📊 Diagnostics**: 
+9. **📊 Diagnostics**: 
     > "Include toggleable diagnostic information showing cpu consumption, fps, memory consumption and other important metrics."
 
-11. **🔤 Text Rendering**: 
+10. **🔤 Text Rendering**: 
     > "The text in both modes is backwards. Fix it."
 
-12. **📦 Container Integration**: 
+11. **📦 Container Integration**: 
     > "The face detection diagnostics should be included in the main container."
 
 ### ⚡ Final Optimizations
-13. **📹 Camera Preview**: 
+12. **📹 Camera Preview**: 
     > "When the page is first loaded, don't show the blank canvas, already load the camera and preview. Starting the detection should start the face detection loop. Also, when pressing show diagnostics, got this in the front end console. app.js:410 Uncaught ReferenceError: diagnosticsEnabled is not defined at HTMLButtonElement.toggleDiagnostics (app.js:410:3) Put the camera detection above the canvas."
 
-14. **🔄 CI/CD Pipeline**: 
+13. **🔄 CI/CD Pipeline**: 
     > "Set up the workflow to build and publish the docker image hosted on ghcr"
 
-15. **📊 Documentation Enhancement**: 
+14. **📊 Documentation Enhancement**: 
     > "Update the readme with the prompts which were used to create the application."
 
-16. **🎨 Visual Enhancement**: 
+15. **🎨 Visual Enhancement**: 
     > "Add emojis to the readme for each section."
 
 ### 🛠️ Technical Decisions Made
