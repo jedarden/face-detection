@@ -58,6 +58,15 @@ python3 -m http.server 8000
 ```
 
 ### 🐳 Docker Application
+
+#### From GitHub Container Registry (Recommended)
+```bash
+docker pull ghcr.io/jedarden/face-detection:latest
+docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:latest
+# Open http://localhost:8080
+```
+
+#### From Source
 ```bash
 cd docker-app
 docker-compose up
@@ -93,6 +102,28 @@ Each subdirectory contains detailed documentation:
 - `/research/face-detection-lite/README.md` - Research findings and algorithm details
 - `/docker-app/README.md` - Docker application setup and configuration
 - `/docker-app/SUMMARY.md` - Comprehensive build summary
+- `DOCKER_DEPLOYMENT.md` - 🐳 Docker deployment guide with GHCR integration
+
+## 🐳 Docker Images
+
+Pre-built Docker images are automatically published to GitHub Container Registry:
+
+### 🏷️ Available Tags
+- `latest` - Latest stable release
+- `v{version}` - Specific version releases
+- `main` - Main branch builds
+- `dev-{branch}` - Development branch builds
+
+### 📦 Image Registry
+```
+ghcr.io/jedarden/face-detection
+```
+
+### 🔄 Automated Builds
+- ✅ **Multi-platform** (AMD64, ARM64)
+- ✅ **Security scanning** with Trivy
+- ✅ **Automated testing** before publication
+- ✅ **Semantic versioning** for releases
 
 ## 📜 License
 

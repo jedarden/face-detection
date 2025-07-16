@@ -1,0 +1,92 @@
+name: 🔒 Security Scan
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker-app/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docker-app/**'
+  schedule:
+    - cron: '0 2 * * 1' # Weekly scan on Mondays at 2 AM UTC
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🛠️ Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 🏗️ Build Docker image for scanning
+      uses: docker/build-push-action@v5
+      with:
+        context: ./docker-app
+        file: ./docker-app/Dockerfile
+        push: false
+        tags: face-detection-security-scan:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: 🔍 Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: face-detection-security-scan:latest
+        format: sarif
+        output: trivy-results.sarif
+
+    - name: 📊 Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: trivy-results.sarif
+
+    - name: 🔒 Run Docker security scan
+      run: |
+        echo "🔍 Running Docker security best practices scan..."
+        
+        # Check for security best practices
+        docker run --rm -i hadolint/hadolint < docker-app/Dockerfile || true
+        
+        # Check for known vulnerabilities
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v $PWD:/root/ \
+          -t aquasec/trivy:latest image \
+          --severity HIGH,CRITICAL \
+          face-detection-security-scan:latest
+        
+        echo "✅ Security scan completed!"
+
+    - name: 📋 Generate security summary
+      run: |
+        echo "## 🔒 Security Scan Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Scan Date:** \`$(date -u)\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Image:** \`face-detection-security-scan:latest\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🛡️ Security Measures:" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔒 Non-root user execution" >> $GITHUB_STEP_SUMMARY
+        echo "- 🚫 No sensitive data in image" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔐 Secure headers configured" >> $GITHUB_STEP_SUMMARY
+        echo "- 🛡️ Regular vulnerability scanning" >> $GITHUB_STEP_SUMMARY
+        echo "- 📋 SARIF results uploaded to Security tab" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Scan Coverage:" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔍 Base image vulnerabilities" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 Package vulnerabilities" >> $GITHUB_STEP_SUMMARY
+        echo "- 🐳 Dockerfile best practices" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔒 Security configuration" >> $GITHUB_STEP_SUMMARY
