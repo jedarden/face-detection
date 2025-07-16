@@ -1,5 +1,9 @@
 # 🎯 Face Detection Repository
 
+[![Docker Build](https://github.com/jedarden/face-detection/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/jedarden/face-detection/actions/workflows/docker-publish.yml)
+[![Security Scan](https://github.com/jedarden/face-detection/actions/workflows/security-scan.yml/badge.svg)](https://github.com/jedarden/face-detection/actions/workflows/security-scan.yml)
+[![Docker Image](https://ghcr-badge.egpl.dev/jedarden/face-detection/latest_tag?trim=major&label=Docker%20Image&color=blue)](https://github.com/jedarden/face-detection/pkgs/container/face-detection)
+
 This repository contains comprehensive research and implementations of face detection technology, from basic research to production-ready Docker applications.
 
 ## 📁 Repository Structure
@@ -124,6 +128,15 @@ ghcr.io/jedarden/face-detection
 - ✅ **Security scanning** with Trivy
 - ✅ **Automated testing** before publication
 - ✅ **Semantic versioning** for releases
+- ✅ **GitHub Actions** CI/CD pipeline
+- ✅ **GHCR integration** for image hosting
+
+### 📊 Build Status
+All builds are automatically triggered on:
+- 🔄 **Push to main** - Latest production builds
+- 🏷️ **Version tags** - Semantic version releases
+- 🔀 **Pull requests** - Validation builds
+- 🕐 **Schedule** - Weekly security scans
 
 ## 📜 License
 
