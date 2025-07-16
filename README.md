@@ -3,8 +3,12 @@
 [![Docker Build](https://github.com/jedarden/face-detection/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/jedarden/face-detection/actions/workflows/docker-publish.yml)
 [![Security Scan](https://github.com/jedarden/face-detection/actions/workflows/security-scan.yml/badge.svg)](https://github.com/jedarden/face-detection/actions/workflows/security-scan.yml)
 [![Docker Image](https://ghcr-badge.egpl.dev/jedarden/face-detection/latest_tag?trim=major&label=Docker%20Image&color=blue)](https://github.com/jedarden/face-detection/pkgs/container/face-detection)
+[![Security](https://img.shields.io/badge/Security-Patched%20v1.1.0-green)](./docker-app/SECURITY_UPDATE_MIGRATION.md)
 
 This repository contains comprehensive research and implementations of face detection technology, from basic research to production-ready Docker applications.
+
+## 🔒 Security Update (v1.1.0)
+All known security vulnerabilities have been patched in version 1.1.0. The application now passes comprehensive security audits with 0 vulnerabilities. See the [Security Migration Guide](./docker-app/SECURITY_UPDATE_MIGRATION.md) for details.
 
 ## 📁 Repository Structure
 

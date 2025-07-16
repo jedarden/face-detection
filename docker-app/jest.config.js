@@ -3,7 +3,8 @@ module.exports = {
   roots: ['<rootDir>/tests', '<rootDir>/src'],
   testMatch: [
     '<rootDir>/tests/unit/**/*.test.js',
-    '<rootDir>/tests/integration/**/*.test.js'
+    '<rootDir>/tests/integration/**/*.test.js',
+    '<rootDir>/tests/security/**/*.test.js'
   ],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
