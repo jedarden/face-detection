@@ -1,6 +1,6 @@
 {
   "name": "face-detection-app",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Face detection application using face-api.js with enhanced security",
   "main": "src/index.js",
   "scripts": {

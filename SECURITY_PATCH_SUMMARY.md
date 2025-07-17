@@ -1,10 +1,16 @@
-# Security Patch Summary - v1.1.0
+# Security Patch Summary - v1.1.1
 
 ## Overview
 Successfully resolved all security vulnerabilities in the face-detection application through test-driven development approach.
 
 ## GitHub Security Scan Status
 ✅ Security scan workflow fixed and operational (CodeQL v3, Docker build issues resolved)
+
+## Version 1.1.1 Updates
+- Fixed GitHub Actions security scan workflow failures
+- Updated CodeQL action from v2 to v3 (resolved deprecation warnings)
+- Resolved Trivy Docker access issues for container vulnerability scanning
+- All security scans now pass successfully with proper SARIF uploads
 
 ## Security Scan Results
 
