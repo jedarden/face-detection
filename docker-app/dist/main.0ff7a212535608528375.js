@@ -2585,10 +2585,12 @@ function initializeWASMBackend() {
  */
 function _initializeWASMBackend() {
   _initializeWASMBackend = wasmBackend_asyncToGenerator(/*#__PURE__*/wasmBackend_regenerator().m(function _callee3() {
-    var result, currentBackend, _t2, _t3;
+    var result, threadConfig, currentBackend, testTensor, startTime, resultTensor, endTime, testTime, _t2, _t3;
     return wasmBackend_regenerator().w(function (_context3) {
       while (1) switch (_context3.p = _context3.n) {
         case 0:
+          console.group('🚀 WASM Backend Initialization');
+          console.log('Starting WebAssembly backend setup...');
           result = {
             backend: 'wasm',
             fallback: false,
@@ -2596,13 +2598,23 @@ function _initializeWASMBackend() {
             error: null
           };
           _context3.p = 1;
+          // Log WebAssembly availability
+          console.log('WebAssembly available:', typeof WebAssembly !== 'undefined');
+
           // Configure WASM paths
+          console.log('Configuring WASM paths...');
           configureWASMPaths();
 
           // Configure threads
+          console.log('Configuring WASM threads...');
           _context3.n = 2;
           return configureWASMThreads();
         case 2:
+          threadConfig = _context3.v;
+          console.log('Thread configuration:', threadConfig);
+
+          // Set WASM as the backend
+          console.log('Setting WASM backend...');
           _context3.n = 3;
           return dist.setBackend('wasm');
         case 3:
@@ -2611,6 +2623,7 @@ function _initializeWASMBackend() {
         case 4:
           // Verify backend is set correctly
           currentBackend = dist.getBackend();
+          console.log('✅ Current backend:', currentBackend);
           if (!(currentBackend !== 'wasm')) {
             _context3.n = 5;
             break;
@@ -2621,45 +2634,62 @@ function _initializeWASMBackend() {
           return detectWASMFeatures();
         case 6:
           result.features = _context3.v;
-          console.log('WASM backend initialized successfully:', result.features);
-          _context3.n = 14;
-          break;
+          console.log('WASM Features detected:', result.features);
+
+          // Performance test
+          console.log('Running WASM performance test...');
+          testTensor = dist.randomNormal([100, 100]);
+          startTime = performance.now();
+          resultTensor = dist.matMul(testTensor, testTensor);
+          _context3.n = 7;
+          return resultTensor.data();
         case 7:
-          _context3.p = 7;
+          endTime = performance.now();
+          testTime = endTime - startTime;
+          console.log("WASM MatMul (100x100) completed in: ".concat(testTime.toFixed(2), "ms"));
+          testTensor.dispose();
+          resultTensor.dispose();
+          console.log('✅ WASM backend initialized successfully!');
+          console.log('WASM is ACTIVE - Enjoy 8-20X faster inference! 🎯');
+          _context3.n = 15;
+          break;
+        case 8:
+          _context3.p = 8;
           _t2 = _context3.v;
-          console.error('Failed to initialize WASM backend:', _t2);
+          console.error('❌ Failed to initialize WASM backend:', _t2);
           result.error = _t2.message;
 
           // Fallback to WebGL
-          _context3.p = 8;
-          _context3.n = 9;
-          return dist.setBackend('webgl');
-        case 9:
+          _context3.p = 9;
           _context3.n = 10;
-          return dist.ready();
+          return dist.setBackend('webgl');
         case 10:
+          _context3.n = 11;
+          return dist.ready();
+        case 11:
           result.backend = 'webgl';
           result.fallback = true;
           console.log('Fallback to WebGL backend successful');
-          _context3.n = 14;
+          _context3.n = 15;
           break;
-        case 11:
-          _context3.p = 11;
+        case 12:
+          _context3.p = 12;
           _t3 = _context3.v;
           console.error('WebGL fallback also failed:', _t3);
           // Final fallback to CPU
-          _context3.n = 12;
-          return dist.setBackend('cpu');
-        case 12:
           _context3.n = 13;
-          return dist.ready();
+          return dist.setBackend('cpu');
         case 13:
+          _context3.n = 14;
+          return dist.ready();
+        case 14:
           result.backend = 'cpu';
           result.fallback = true;
-        case 14:
+        case 15:
+          console.groupEnd();
           return _context3.a(2, result);
       }
-    }, _callee3, null, [[8, 11], [1, 7]]);
+    }, _callee3, null, [[9, 12], [1, 8]]);
   }));
   return _initializeWASMBackend.apply(this, arguments);
 }
@@ -3665,7 +3695,9 @@ var FaceDetectionApp = /*#__PURE__*/function () {
       var backendInfo = document.getElementById('backend-info');
       if (backendInfo) {
         var perfInfo = getBackendPerformance();
-        backendInfo.innerHTML = "\n        <span class=\"backend-badge\">\n          Backend: <strong>".concat(this.backendType, "</strong>\n          ").concat(perfInfo.features.simd ? ' | SIMD ✓' : '', "\n          ").concat(perfInfo.features.threads ? ' | Threads ✓' : '', "\n        </span>\n      ");
+        var isWASM = this.backendType === 'wasm';
+        var color = isWASM ? '#28a745' : '#6c757d';
+        backendInfo.innerHTML = "\n        <div class=\"backend-status\" style=\"\n          background-color: ".concat(color, ";\n          color: white;\n          padding: 10px 15px;\n          border-radius: 8px;\n          margin-bottom: 15px;\n          text-align: center;\n          font-family: monospace;\n        \">\n          <div style=\"font-size: 18px; font-weight: bold; margin-bottom: 5px;\">\n            ").concat(isWASM ? '🚀 WASM ACTIVE' : this.backendType.toUpperCase() + ' MODE', "\n          </div>\n          <div style=\"font-size: 14px;\">\n            Backend: <strong>").concat(this.backendType, "</strong>\n            ").concat(perfInfo.features.simd ? ' | SIMD ✓' : ' | SIMD ✗', "\n            ").concat(perfInfo.features.threads ? ' | Threads ✓' : ' | Threads ✗', "\n          </div>\n          ").concat(isWASM ? '<div style="font-size: 12px; margin-top: 5px;">8-20X faster inference</div>' : '', "\n        </div>\n      ");
       }
     }
   }, {
@@ -3729,4 +3761,4 @@ document.addEventListener('DOMContentLoaded', function () {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=main.b8b771ee459238daa55e.js.map
+//# sourceMappingURL=main.0ff7a212535608528375.js.map

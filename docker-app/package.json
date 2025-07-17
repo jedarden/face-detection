@@ -17,7 +17,8 @@
     "migrate:wasm": "node migrate-to-wasm.js",
     "migrate:rollback": "node migrate-to-wasm.js --rollback",
     "test:wasm": "jest tests/unit/wasmMigration.test.js",
-    "benchmark:wasm": "node src/wasmBenchmark.js"
+    "benchmark:wasm": "node src/wasmBenchmark.js",
+    "verify:wasm": "node verify-wasm.js"
   },
   "keywords": [
     "face-detection",

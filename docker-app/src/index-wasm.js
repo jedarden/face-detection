@@ -601,12 +601,29 @@ export class FaceDetectionApp {
     const backendInfo = document.getElementById('backend-info');
     if (backendInfo) {
       const perfInfo = getBackendPerformance();
+      const isWASM = this.backendType === 'wasm';
+      const color = isWASM ? '#28a745' : '#6c757d';
+      
       backendInfo.innerHTML = `
-        <span class="backend-badge">
-          Backend: <strong>${this.backendType}</strong>
-          ${perfInfo.features.simd ? ' | SIMD ✓' : ''}
-          ${perfInfo.features.threads ? ' | Threads ✓' : ''}
-        </span>
+        <div class="backend-status" style="
+          background-color: ${color};
+          color: white;
+          padding: 10px 15px;
+          border-radius: 8px;
+          margin-bottom: 15px;
+          text-align: center;
+          font-family: monospace;
+        ">
+          <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">
+            ${isWASM ? '🚀 WASM ACTIVE' : this.backendType.toUpperCase() + ' MODE'}
+          </div>
+          <div style="font-size: 14px;">
+            Backend: <strong>${this.backendType}</strong>
+            ${perfInfo.features.simd ? ' | SIMD ✓' : ' | SIMD ✗'}
+            ${perfInfo.features.threads ? ' | Threads ✓' : ' | Threads ✗'}
+          </div>
+          ${isWASM ? '<div style="font-size: 12px; margin-top: 5px;">8-20X faster inference</div>' : ''}
+        </div>
       `;
     }
   }

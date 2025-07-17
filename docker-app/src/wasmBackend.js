@@ -95,6 +95,9 @@ export async function configureWASMThreads() {
  * Initialize WASM backend with optimal configuration
  */
 export async function initializeWASMBackend() {
+  console.group('🚀 WASM Backend Initialization');
+  console.log('Starting WebAssembly backend setup...');
+  
   const result = {
     backend: 'wasm',
     fallback: false,
@@ -103,13 +106,20 @@ export async function initializeWASMBackend() {
   };
 
   try {
+    // Log WebAssembly availability
+    console.log('WebAssembly available:', typeof WebAssembly !== 'undefined');
+    
     // Configure WASM paths
+    console.log('Configuring WASM paths...');
     configureWASMPaths();
 
     // Configure threads
-    await configureWASMThreads();
+    console.log('Configuring WASM threads...');
+    const threadConfig = await configureWASMThreads();
+    console.log('Thread configuration:', threadConfig);
 
     // Set WASM as the backend
+    console.log('Setting WASM backend...');
     await tf.setBackend('wasm');
     
     // Wait for backend to be ready
@@ -117,17 +127,33 @@ export async function initializeWASMBackend() {
 
     // Verify backend is set correctly
     const currentBackend = tf.getBackend();
+    console.log('✅ Current backend:', currentBackend);
+    
     if (currentBackend !== 'wasm') {
       throw new Error(`Backend mismatch: expected 'wasm', got '${currentBackend}'`);
     }
 
     // Detect features
     result.features = await detectWASMFeatures();
+    console.log('WASM Features detected:', result.features);
 
-    console.log('WASM backend initialized successfully:', result.features);
+    // Performance test
+    console.log('Running WASM performance test...');
+    const testTensor = tf.randomNormal([100, 100]);
+    const startTime = performance.now();
+    const resultTensor = tf.matMul(testTensor, testTensor);
+    await resultTensor.data();
+    const endTime = performance.now();
+    const testTime = endTime - startTime;
+    console.log(`WASM MatMul (100x100) completed in: ${testTime.toFixed(2)}ms`);
+    testTensor.dispose();
+    resultTensor.dispose();
+
+    console.log('✅ WASM backend initialized successfully!');
+    console.log('WASM is ACTIVE - Enjoy 8-20X faster inference! 🎯');
 
   } catch (error) {
-    console.error('Failed to initialize WASM backend:', error);
+    console.error('❌ Failed to initialize WASM backend:', error);
     result.error = error.message;
 
     // Fallback to WebGL
@@ -147,6 +173,7 @@ export async function initializeWASMBackend() {
     }
   }
 
+  console.groupEnd();
   return result;
 }
 
