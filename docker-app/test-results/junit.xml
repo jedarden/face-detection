@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="21" failures="12" errors="0" time="18.452">
+  <testsuite name="WASM Migration Tests" errors="0" failures="12" skipped="0" timestamp="2025-07-17T02:22:09" time="17.614" tests="21">
+    <testcase classname="WASM Migration Tests Feature Parity Tests should maintain same API surface as original face-api.js" name="WASM Migration Tests Feature Parity Tests should maintain same API surface as original face-api.js" time="0.648">
+    </testcase>
+    <testcase classname="WASM Migration Tests Feature Parity Tests should load same models as original implementation" name="WASM Migration Tests Feature Parity Tests should load same models as original implementation" time="0.036">
+    </testcase>
+    <testcase classname="WASM Migration Tests Feature Parity Tests should return same detection result structure" name="WASM Migration Tests Feature Parity Tests should return same detection result structure" time="0.005">
+      <failure>TypeError: Cannot set properties of null (setting &apos;innerHTML&apos;)
+    at FaceDetectionApp.updateStats (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:350:20)
+    at FaceDetectionApp.updateStats (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:322:10)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:119:7)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should initialize WASM backend" name="WASM Migration Tests WASM Backend Tests should initialize WASM backend" time="0.177">
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should detect SIMD support" name="WASM Migration Tests WASM Backend Tests should detect SIMD support" time="0.005">
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should configure optimal thread count" name="WASM Migration Tests WASM Backend Tests should configure optimal thread count" time="0.002">
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should fallback gracefully if WASM unavailable" name="WASM Migration Tests WASM Backend Tests should fallback gracefully if WASM unavailable" time="0.006">
+    </testcase>
+    <testcase classname="WASM Migration Tests Performance Comparison Tests should measure inference time for both backends" name="WASM Migration Tests Performance Comparison Tests should measure inference time for both backends" time="0.216">
+      <failure>Error: expect(received).toHaveProperty(path)
+
+Matcher error: received value must not be null nor undefined
+
+Received has value: null
+    at Object.toHaveProperty (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:178:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Performance Comparison Tests should track memory usage" name="WASM Migration Tests Performance Comparison Tests should track memory usage" time="0.001">
+      <failure>TypeError: tf.memory is not a function
+    at memory (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmBenchmark.js:151:36)
+    at Object.measureMemoryUsage (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:185:33)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Model Compatibility Tests should work with all face-api.js model types" name="WASM Migration Tests Model Compatibility Tests should work with all face-api.js model types" time="0.152">
+      <failure>TypeError: ctx.beginPath is not a function
+    at beginPath (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:279:7)
+    at createTestCanvas (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:28:22)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:197:29)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Model Compatibility Tests should maintain detection accuracy" name="WASM Migration Tests Model Compatibility Tests should maintain detection accuracy" time="0.002">
+      <failure>TypeError: ctx.beginPath is not a function
+    at beginPath (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:279:7)
+    at createTestCanvas (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:100:22)
+    at Object.compareDetectionAccuracy (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:209:30)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Migration Path Tests should seamlessly switch from face-api.js to @vladmandic/face-api" name="WASM Migration Tests Migration Path Tests should seamlessly switch from face-api.js to @vladmandic/face-api" time="0.001">
+    </testcase>
+    <testcase classname="WASM Migration Tests Migration Path Tests should preserve all detection options" name="WASM Migration Tests Migration Path Tests should preserve all detection options" time="0.001">
+      <failure>TypeError: app.getLiteModeOptions is not a function
+    at Object.getLiteModeOptions (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:233:31)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Browser Compatibility Tests should work in browsers without SIMD support" name="WASM Migration Tests Browser Compatibility Tests should work in browsers without SIMD support" time="0.007">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: false
+Received: undefined
+    at Object.toBe (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:254:34)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Browser Compatibility Tests should handle SharedArrayBuffer restrictions" name="WASM Migration Tests Browser Compatibility Tests should handle SharedArrayBuffer restrictions" time="0.001">
+    </testcase>
+    <testcase classname="WASM Migration Tests Error Handling Tests should handle WASM loading errors gracefully" name="WASM Migration Tests Error Handling Tests should handle WASM loading errors gracefully" time="0.001">
+      <failure>Error: expect(received).toBeDefined()
+
+Received: undefined
+    at Object.toBeDefined (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:278:28)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Error Handling Tests should maintain functionality with backend fallback" name="WASM Migration Tests Error Handling Tests should maintain functionality with backend fallback" time="0.005">
+      <failure>TypeError: Cannot set properties of null (setting &apos;innerHTML&apos;)
+    at FaceDetectionApp.showError (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:381:18)
+    at FaceDetectionApp.showError [as init] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:60:12)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:288:7)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Configuration Tests should allow backend selection via config" name="WASM Migration Tests Configuration Tests should allow backend selection via config" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;preferredBackend&apos;)
+    at Object.preferredBackend (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:299:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Configuration Tests should expose backend information to UI" name="WASM Migration Tests Configuration Tests should expose backend information to UI" time="0.001">
+      <failure>TypeError: app.getBackendInfo is not a function
+    at Object.getBackendInfo (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:310:31)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Integration Tests with WASM should complete full detection workflow with WASM backend" name="Integration Tests with WASM should complete full detection workflow with WASM backend" time="10">
+      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
+Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
+    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:319:3)
+    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
+    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
+    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:318:1)
+    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
+    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
+    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
+    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Integration Tests with WASM should maintain real-time performance" name="Integration Tests with WASM should maintain real-time performance" time="5.028">
+    </testcase>
+  </testsuite>
+</testsuites>

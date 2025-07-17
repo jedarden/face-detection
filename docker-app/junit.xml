@@ -1,918 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="79" failures="38" errors="0" time="77.257">
-  <testsuite name="UI Components Tests" errors="0" failures="5" skipped="0" timestamp="2025-07-16T18:46:02" time="2.976" tests="17">
-    <testcase classname="UI Components Tests UI Setup should create complete UI structure" name="UI Components Tests UI Setup should create complete UI structure" time="0.276">
+<testsuites name="jest tests" tests="21" failures="12" errors="0" time="20.362">
+  <testsuite name="WASM Migration Tests" errors="0" failures="12" skipped="0" timestamp="2025-07-17T02:22:09" time="17.614" tests="21">
+    <testcase classname="WASM Migration Tests Feature Parity Tests should maintain same API surface as original face-api.js" name="WASM Migration Tests Feature Parity Tests should maintain same API surface as original face-api.js" time="0.648">
+    </testcase>
+    <testcase classname="WASM Migration Tests Feature Parity Tests should load same models as original implementation" name="WASM Migration Tests Feature Parity Tests should load same models as original implementation" time="0.036">
+    </testcase>
+    <testcase classname="WASM Migration Tests Feature Parity Tests should return same detection result structure" name="WASM Migration Tests Feature Parity Tests should return same detection result structure" time="0.005">
+      <failure>TypeError: Cannot set properties of null (setting &apos;innerHTML&apos;)
+    at FaceDetectionApp.updateStats (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:350:20)
+    at FaceDetectionApp.updateStats (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:322:10)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:119:7)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should initialize WASM backend" name="WASM Migration Tests WASM Backend Tests should initialize WASM backend" time="0.177">
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should detect SIMD support" name="WASM Migration Tests WASM Backend Tests should detect SIMD support" time="0.005">
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should configure optimal thread count" name="WASM Migration Tests WASM Backend Tests should configure optimal thread count" time="0.002">
+    </testcase>
+    <testcase classname="WASM Migration Tests WASM Backend Tests should fallback gracefully if WASM unavailable" name="WASM Migration Tests WASM Backend Tests should fallback gracefully if WASM unavailable" time="0.006">
+    </testcase>
+    <testcase classname="WASM Migration Tests Performance Comparison Tests should measure inference time for both backends" name="WASM Migration Tests Performance Comparison Tests should measure inference time for both backends" time="0.216">
+      <failure>Error: expect(received).toHaveProperty(path)
+
+Matcher error: received value must not be null nor undefined
+
+Received has value: null
+    at Object.toHaveProperty (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:178:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Performance Comparison Tests should track memory usage" name="WASM Migration Tests Performance Comparison Tests should track memory usage" time="0.001">
+      <failure>TypeError: tf.memory is not a function
+    at memory (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmBenchmark.js:151:36)
+    at Object.measureMemoryUsage (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:185:33)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Model Compatibility Tests should work with all face-api.js model types" name="WASM Migration Tests Model Compatibility Tests should work with all face-api.js model types" time="0.152">
+      <failure>TypeError: ctx.beginPath is not a function
+    at beginPath (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:279:7)
+    at createTestCanvas (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:28:22)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:197:29)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Model Compatibility Tests should maintain detection accuracy" name="WASM Migration Tests Model Compatibility Tests should maintain detection accuracy" time="0.002">
+      <failure>TypeError: ctx.beginPath is not a function
+    at beginPath (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:279:7)
+    at createTestCanvas (/workspaces/face-detection/face-detection-repo/docker-app/src/wasmCompatibility.js:100:22)
+    at Object.compareDetectionAccuracy (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:209:30)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Migration Path Tests should seamlessly switch from face-api.js to @vladmandic/face-api" name="WASM Migration Tests Migration Path Tests should seamlessly switch from face-api.js to @vladmandic/face-api" time="0.001">
+    </testcase>
+    <testcase classname="WASM Migration Tests Migration Path Tests should preserve all detection options" name="WASM Migration Tests Migration Path Tests should preserve all detection options" time="0.001">
+      <failure>TypeError: app.getLiteModeOptions is not a function
+    at Object.getLiteModeOptions (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:233:31)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="WASM Migration Tests Browser Compatibility Tests should work in browsers without SIMD support" name="WASM Migration Tests Browser Compatibility Tests should work in browsers without SIMD support" time="0.007">
       <failure>Error: expect(received).toBe(expected) // Object.is equality
 
-Expected: true
-Received: false
-    at Object.toBe (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/uiComponents.test.js:36:27)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="UI Components Tests UI Setup should have correct initial button states" name="UI Components Tests UI Setup should have correct initial button states" time="0.059">
-    </testcase>
-    <testcase classname="UI Components Tests UI Setup should attach event listeners to buttons" name="UI Components Tests UI Setup should attach event listeners to buttons" time="0.034">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalled()
-
-Expected number of calls: &gt;= 1
-Received number of calls:    0
-    at Object.toHaveBeenCalled (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/uiComponents.test.js:85:32)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="UI Components Tests Button State Management should toggle button states when starting detection" name="UI Components Tests Button State Management should toggle button states when starting detection" time="0.022">
-    </testcase>
-    <testcase classname="UI Components Tests Button State Management should toggle button states when stopping detection" name="UI Components Tests Button State Management should toggle button states when stopping detection" time="0.029">
-    </testcase>
-    <testcase classname="UI Components Tests Stats Display should update stats with face count" name="UI Components Tests Stats Display should update stats with face count" time="0.031">
-    </testcase>
-    <testcase classname="UI Components Tests Stats Display should display model information" name="UI Components Tests Stats Display should display model information" time="0.091">
-    </testcase>
-    <testcase classname="UI Components Tests Stats Display should display feature information" name="UI Components Tests Stats Display should display feature information" time="0.048">
-      <failure>Error: expect(received).toContain(expected) // indexOf
-
-Expected substring: &quot;Features: Landmarks, Expressions, Age &amp; Gender&quot;
-Received string:    &quot;
-      &lt;p&gt;Faces detected: &lt;strong&gt;0&lt;/strong&gt;&lt;/p&gt;
-      &lt;p&gt;Model: TinyFaceDetector&lt;/p&gt;
-      &lt;p&gt;Features: Landmarks, Expressions, Age &amp;amp; Gender&lt;/p&gt;
-    &quot;
-    at Object.toContain (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/uiComponents.test.js:144:31)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="UI Components Tests Stats Display should handle zero faces detected" name="UI Components Tests Stats Display should handle zero faces detected" time="0.06">
-    </testcase>
-    <testcase classname="UI Components Tests Error Display should display error message" name="UI Components Tests Error Display should display error message" time="0.023">
-    </testcase>
-    <testcase classname="UI Components Tests Error Display should replace entire UI with error display" name="UI Components Tests Error Display should replace entire UI with error display" time="0.025">
-    </testcase>
-    <testcase classname="UI Components Tests UI Responsiveness should handle rapid button clicks" name="UI Components Tests UI Responsiveness should handle rapid button clicks" time="0.016">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledTimes(expected)
-
-Expected number of calls: 3
-Received number of calls: 1
-    at Object.toHaveBeenCalledTimes (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/uiComponents.test.js:195:33)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="UI Components Tests UI Responsiveness should prevent starting detection when not ready" name="UI Components Tests UI Responsiveness should prevent starting detection when not ready" time="0.043">
-    </testcase>
-    <testcase classname="UI Components Tests Canvas Overlay should clear canvas when stopping detection" name="UI Components Tests Canvas Overlay should clear canvas when stopping detection" time="0.039">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 0, 0, 300, 150
-
-Number of calls: 0
-    at Object.toHaveBeenCalledWith (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/uiComponents.test.js:223:28)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="UI Components Tests Canvas Overlay should position canvas over video" name="UI Components Tests Canvas Overlay should position canvas over video" time="0.015">
-    </testcase>
-    <testcase classname="UI Components Tests Dynamic UI Updates should handle stats updates during detection" name="UI Components Tests Dynamic UI Updates should handle stats updates during detection" time="0.022">
-    </testcase>
-    <testcase classname="UI Components Tests Dynamic UI Updates should maintain UI structure after multiple operations" name="UI Components Tests Dynamic UI Updates should maintain UI structure after multiple operations" time="0.019">
-    </testcase>
-  </testsuite>
-  <testsuite name="Camera Selection Tests" errors="0" failures="2" skipped="0" timestamp="2025-07-16T18:46:05" time="0.39" tests="14">
-    <testcase classname="Camera Selection Tests Camera Enumeration should enumerate cameras after getting permission" name="Camera Selection Tests Camera Enumeration should enumerate cameras after getting permission" time="0.002">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Enumeration should handle empty device labels" name="Camera Selection Tests Camera Enumeration should handle empty device labels" time="0.001">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Enumeration should request permission if no stream exists" name="Camera Selection Tests Camera Enumeration should request permission if no stream exists" time="0.001">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Selection should select camera by device ID" name="Camera Selection Tests Camera Selection should select camera by device ID" time="0.002">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Selection should use exact deviceId constraint when selecting camera" name="Camera Selection Tests Camera Selection should use exact deviceId constraint when selecting camera" time="0.002">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Selection should throw error if no deviceId provided" name="Camera Selection Tests Camera Selection should throw error if no deviceId provided" time="0.019">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Selection should restart camera if already active" name="Camera Selection Tests Camera Selection should restart camera if already active" time="0.001">
-    </testcase>
-    <testcase classname="Camera Selection Tests UI Camera Selector should show camera selector when multiple cameras available" name="Camera Selection Tests UI Camera Selector should show camera selector when multiple cameras available" time="0.02">
-    </testcase>
-    <testcase classname="Camera Selection Tests UI Camera Selector should hide camera selector when only one camera available" name="Camera Selection Tests UI Camera Selector should hide camera selector when only one camera available" time="0.011">
-    </testcase>
-    <testcase classname="Camera Selection Tests UI Camera Selector should handle camera switch from UI" name="Camera Selection Tests UI Camera Selector should handle camera switch from UI" time="0.038">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Switching During Detection should maintain detection state when switching cameras" name="Camera Selection Tests Camera Switching During Detection should maintain detection state when switching cameras" time="0.019">
-    </testcase>
-    <testcase classname="Camera Selection Tests Camera Switching During Detection should handle camera switch errors gracefully" name="Camera Selection Tests Camera Switching During Detection should handle camera switch errors gracefully" time="0.011">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: &quot;Failed to switch camera:&quot;, Any&lt;Error&gt;
-
-Number of calls: 0
-    at Object.toHaveBeenCalledWith (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraSelection.test.js:260:31)</failure>
-    </testcase>
-    <testcase classname="Camera Selection Tests Stream Information should get current stream information" name="Camera Selection Tests Stream Information should get current stream information" time="0.001">
-      <failure>Error: Camera access error: Camera not available
-    at CameraManager.handleCameraError (/workspaces/face-detection/face-detection-repo/docker-app/src/cameraUtils.js:90:11)
-    at CameraManager.handleCameraError [as startCamera] (/workspaces/face-detection/face-detection-repo/docker-app/src/cameraUtils.js:44:12)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraSelection.test.js:271:7)</failure>
-    </testcase>
-    <testcase classname="Camera Selection Tests Stream Information should return null if no active stream" name="Camera Selection Tests Stream Information should return null if no active stream" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="Performance Tests" errors="0" failures="10" skipped="0" timestamp="2025-07-16T18:46:01" time="4.016" tests="10">
-    <testcase classname="Performance Tests Detection Performance should complete face detection within acceptable time" name="Performance Tests Detection Performance should complete face detection within acceptable time" time="0.328">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:51:19)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Detection Performance should maintain consistent detection times" name="Performance Tests Detection Performance should maintain consistent detection times" time="0.039">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:72:21)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Detection Performance should handle multiple faces efficiently" name="Performance Tests Detection Performance should handle multiple faces efficiently" time="0.017">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:111:21)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Frame Rate Performance should maintain minimum 15 FPS during detection" name="Performance Tests Frame Rate Performance should maintain minimum 15 FPS during detection" time="0.043">
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Memory Performance should not leak memory during continuous detection" name="Performance Tests Memory Performance should not leak memory during continuous detection" time="0.269">
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests CPU Load Performance should handle detection under high CPU load" name="Performance Tests CPU Load Performance should handle detection under high CPU load" time="0.03">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:209:19)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Model Loading Performance should load models within acceptable time" name="Performance Tests Model Loading Performance should load models within acceptable time" time="0.025">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:228:19)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Model Loading Performance should handle parallel model loading efficiently" name="Performance Tests Model Loading Performance should handle parallel model loading efficiently" time="0.045">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:256:19)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Detection Interval Performance should not queue up detections if previous one is slow" name="Performance Tests Detection Interval Performance should not queue up detections if previous one is slow" time="0.524">
-      <failure>Error: Detection already in progress!
-    at FaceDetectionApp.app.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:273:17)
-    at detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:253:20)
-    at Timeout.task [as _onTimeout] (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
-    at listOnTimeout (node:internal/timers:588:17)
-    at processTimers (node:internal/timers:523:7)</failure>
-      <failure>Error: Detection already in progress!
-    at FaceDetectionApp.app.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:273:17)
-    at detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:253:20)
-    at Timeout.task [as _onTimeout] (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
-    at listOnTimeout (node:internal/timers:588:17)
-    at processTimers (node:internal/timers:523:7)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Performance Tests Performance Metrics Collection should provide performance report" name="Performance Tests Performance Metrics Collection should provide performance report" time="0.032">
-      <failure>TypeError: performance.mark is not a function
-    at PerformanceMonitor.mark [as start] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:9:17)
-    at Object.start (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:300:19)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>TypeError: performance.clearMarks is not a function
-    at PerformanceMonitor.clearMarks [as reset] (/workspaces/face-detection/face-detection-repo/docker-app/tests/test-utils/performanceHelpers.js:50:17)
-    at Object.reset (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/performance.test.js:37:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusHook (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:281:40)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:254:5)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-  </testsuite>
-  <testsuite name="Camera Access Tests" errors="0" failures="5" skipped="0" timestamp="2025-07-16T18:46:05" time="0.555" tests="10">
-    <testcase classname="Camera Access Tests setupCamera should successfully access camera with correct constraints" name="Camera Access Tests setupCamera should successfully access camera with correct constraints" time="0.055">
-      <failure>Error: Camera access denied or not available: Camera access error: getUserMedia is not supported in this browser
-    at FaceDetectionApp.setupCamera (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:196:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraAccess.test.js:36:7)</failure>
-    </testcase>
-    <testcase classname="Camera Access Tests setupCamera should handle camera permission denied" name="Camera Access Tests setupCamera should handle camera permission denied" time="0.045">
-    </testcase>
-    <testcase classname="Camera Access Tests setupCamera should handle missing getUserMedia API" name="Camera Access Tests setupCamera should handle missing getUserMedia API" time="0.016">
-    </testcase>
-    <testcase classname="Camera Access Tests setupCamera should adjust canvas dimensions after video loads" name="Camera Access Tests setupCamera should adjust canvas dimensions after video loads" time="0.029">
-      <failure>Error: Camera access denied or not available: Camera access error: getUserMedia is not supported in this browser
-    at FaceDetectionApp.setupCamera (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:196:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraAccess.test.js:72:7)</failure>
-    </testcase>
-    <testcase classname="Camera Access Tests setupCamera should handle different video resolutions" name="Camera Access Tests setupCamera should handle different video resolutions" time="0.016">
-      <failure>Error: Camera access denied or not available: Camera access error: getUserMedia is not supported in this browser
-    at FaceDetectionApp.setupCamera (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:196:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraAccess.test.js:93:7)</failure>
-    </testcase>
-    <testcase classname="Camera Access Tests setupCamera should handle stream errors" name="Camera Access Tests setupCamera should handle stream errors" time="0.05">
-    </testcase>
-    <testcase classname="Camera Access Tests adjustCanvas should set canvas dimensions to match video" name="Camera Access Tests adjustCanvas should set canvas dimensions to match video" time="0.03">
-    </testcase>
-    <testcase classname="Camera Access Tests adjustCanvas should handle zero video dimensions" name="Camera Access Tests adjustCanvas should handle zero video dimensions" time="0.009">
-    </testcase>
-    <testcase classname="Camera Access Tests Camera stream cleanup should stop camera stream when app is destroyed" name="Camera Access Tests Camera stream cleanup should stop camera stream when app is destroyed" time="0.009">
-      <failure>Error: Camera access denied or not available: Camera access error: NotAllowedError
-    at FaceDetectionApp.setupCamera (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:196:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraAccess.test.js:145:7)</failure>
-    </testcase>
-    <testcase classname="Camera Access Tests Multiple camera access attempts should handle rapid successive camera access calls" name="Camera Access Tests Multiple camera access attempts should handle rapid successive camera access calls" time="0.014">
-      <failure>Error: Camera access denied or not available: Camera access error: NotAllowedError
-    at FaceDetectionApp.setupCamera (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:196:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at async Promise.all (index 0)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/cameraAccess.test.js:174:7)</failure>
-    </testcase>
-  </testsuite>
-  <testsuite name="Mode Switching Tests (Lite vs Pro)" errors="0" failures="6" skipped="0" timestamp="2025-07-16T18:46:06" time="0.503" tests="7">
-    <testcase classname="Mode Switching Tests (Lite vs Pro) Detection Modes should detect faces with bounding boxes only (Lite mode)" name="Mode Switching Tests (Lite vs Pro) Detection Modes should detect faces with bounding boxes only (Lite mode)" time="0.051">
-      <failure>TypeError: faceapi.detectAllFaces(...).withFaceLandmarks is not a function
-    at FaceDetectionApp.withFaceLandmarks [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:282:6)
-    at Object.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/modeSwitching.test.js:56:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Mode Switching Tests (Lite vs Pro) Detection Modes should detect faces with full features (Pro mode)" name="Mode Switching Tests (Lite vs Pro) Detection Modes should detect faces with full features (Pro mode)" time="0.044">
-      <failure>TypeError: faceapi.detectAllFaces(...).withFaceLandmarks is not a function
-    at FaceDetectionApp.withFaceLandmarks [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:282:6)
-    at Object.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/modeSwitching.test.js:67:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Mode Switching Tests (Lite vs Pro) Detection Modes should switch between detection modes dynamically" name="Mode Switching Tests (Lite vs Pro) Detection Modes should switch between detection modes dynamically" time="0.022">
-      <failure>TypeError: faceapi.detectAllFaces(...).withFaceLandmarks is not a function
-    at FaceDetectionApp.withFaceLandmarks [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:282:6)
-    at Object.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/modeSwitching.test.js:114:17)
+Expected: false
+Received: undefined
+    at Object.toBe (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:254:34)
     at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
     </testcase>
-    <testcase classname="Mode Switching Tests (Lite vs Pro) Performance differences between modes should have faster detection in lite mode" name="Mode Switching Tests (Lite vs Pro) Performance differences between modes should have faster detection in lite mode" time="0.029">
-      <failure>TypeError: faceapi.detectAllFaces(...).withFaceLandmarks is not a function
-    at FaceDetectionApp.withFaceLandmarks [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:282:6)
-    at Object.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/modeSwitching.test.js:129:19)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    <testcase classname="WASM Migration Tests Browser Compatibility Tests should handle SharedArrayBuffer restrictions" name="WASM Migration Tests Browser Compatibility Tests should handle SharedArrayBuffer restrictions" time="0.001">
     </testcase>
-    <testcase classname="Mode Switching Tests (Lite vs Pro) UI Updates for mode switching should update stats display based on mode" name="Mode Switching Tests (Lite vs Pro) UI Updates for mode switching should update stats display based on mode" time="0.025">
-      <failure>Error: expect(received).toContain(expected) // indexOf
+    <testcase classname="WASM Migration Tests Error Handling Tests should handle WASM loading errors gracefully" name="WASM Migration Tests Error Handling Tests should handle WASM loading errors gracefully" time="0.001">
+      <failure>Error: expect(received).toBeDefined()
 
-Expected substring: &quot;Features: Landmarks, Expressions, Age &amp; Gender&quot;
-Received string:    &quot;
-      &lt;p&gt;Faces detected: &lt;strong&gt;2&lt;/strong&gt;&lt;/p&gt;
-      &lt;p&gt;Model: TinyFaceDetector&lt;/p&gt;
-      &lt;p&gt;Features: Landmarks, Expressions, Age &amp;amp; Gender&lt;/p&gt;
-    &quot;
-    at Object.toContain (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/modeSwitching.test.js:163:31)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Mode Switching Tests (Lite vs Pro) UI Updates for mode switching should show different stats for lite mode" name="Mode Switching Tests (Lite vs Pro) UI Updates for mode switching should show different stats for lite mode" time="0.041">
-    </testcase>
-    <testcase classname="Mode Switching Tests (Lite vs Pro) Model configuration for different modes should use appropriate detector options for each mode" name="Mode Switching Tests (Lite vs Pro) Model configuration for different modes should use appropriate detector options for each mode" time="0.023">
-      <failure>TypeError: faceapi.detectAllFaces(...).withFaceLandmarks is not a function
-    at FaceDetectionApp.withFaceLandmarks [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:282:6)
-    at Object.detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/modeSwitching.test.js:204:17)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-  </testsuite>
-  <testsuite name="Face Detection App" errors="0" failures="0" skipped="0" timestamp="2025-07-16T18:46:06" time="0.243" tests="2">
-    <testcase classname="Face Detection App should have app container" name="Face Detection App should have app container" time="0.015">
-    </testcase>
-    <testcase classname="Face Detection App should initialize with loading state" name="Face Detection App should initialize with loading state" time="0.016">
-    </testcase>
-  </testsuite>
-  <testsuite name="FaceDetectionApp Initialization" errors="0" failures="2" skipped="0" timestamp="2025-07-16T18:46:01" time="6.163" tests="11">
-    <testcase classname="FaceDetectionApp Initialization constructor should initialize with default values" name="FaceDetectionApp Initialization constructor should initialize with default values" time="0.054">
-    </testcase>
-    <testcase classname="FaceDetectionApp Initialization init should successfully initialize the app" name="FaceDetectionApp Initialization init should successfully initialize the app" time="0.207">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalled()
-
-Expected number of calls: &gt;= 1
-Received number of calls:    0
-    at Object.toHaveBeenCalled (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/faceDetectionInit.test.js:50:33)
+Received: undefined
+    at Object.toBeDefined (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:278:28)
     at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
     </testcase>
-    <testcase classname="FaceDetectionApp Initialization init should handle initialization errors gracefully" name="FaceDetectionApp Initialization init should handle initialization errors gracefully" time="0.013">
-    </testcase>
-    <testcase classname="FaceDetectionApp Initialization loadModels should load all required face-api models" name="FaceDetectionApp Initialization loadModels should load all required face-api models" time="0.011">
-    </testcase>
-    <testcase classname="FaceDetectionApp Initialization loadModels should handle model loading failure" name="FaceDetectionApp Initialization loadModels should handle model loading failure" time="0.007">
-    </testcase>
-    <testcase classname="FaceDetectionApp Initialization loadModels should log success message when models are loaded" name="FaceDetectionApp Initialization loadModels should log success message when models are loaded" time="0.02">
-      <failure>Error: Failed to load face detection models: Network error
-    at FaceDetectionApp.loadModels (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:78:13)
+    <testcase classname="WASM Migration Tests Error Handling Tests should maintain functionality with backend fallback" name="WASM Migration Tests Error Handling Tests should maintain functionality with backend fallback" time="0.005">
+      <failure>TypeError: Cannot set properties of null (setting &apos;innerHTML&apos;)
+    at FaceDetectionApp.showError (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:381:18)
+    at FaceDetectionApp.showError [as init] (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:60:12)
     at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/faceDetectionInit.test.js:87:7)</failure>
+    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:288:7)</failure>
     </testcase>
-    <testcase classname="FaceDetectionApp Initialization setupUI should create all required UI elements" name="FaceDetectionApp Initialization setupUI should create all required UI elements" time="0.064">
+    <testcase classname="WASM Migration Tests Configuration Tests should allow backend selection via config" name="WASM Migration Tests Configuration Tests should allow backend selection via config" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;preferredBackend&apos;)
+    at Object.preferredBackend (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:299:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
     </testcase>
-    <testcase classname="FaceDetectionApp Initialization setupUI should store references to video and canvas elements" name="FaceDetectionApp Initialization setupUI should store references to video and canvas elements" time="0.039">
+    <testcase classname="WASM Migration Tests Configuration Tests should expose backend information to UI" name="WASM Migration Tests Configuration Tests should expose backend information to UI" time="0.001">
+      <failure>TypeError: app.getBackendInfo is not a function
+    at Object.getBackendInfo (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:310:31)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
     </testcase>
-    <testcase classname="FaceDetectionApp Initialization setupUI should setup event listeners for control buttons" name="FaceDetectionApp Initialization setupUI should setup event listeners for control buttons" time="0.067">
-    </testcase>
-    <testcase classname="FaceDetectionApp Initialization setupUI should have stop button disabled initially" name="FaceDetectionApp Initialization setupUI should have stop button disabled initially" time="0.022">
-    </testcase>
-    <testcase classname="FaceDetectionApp Initialization Model loading timeout should timeout if models take too long to load" name="FaceDetectionApp Initialization Model loading timeout should timeout if models take too long to load" time="3.009">
-    </testcase>
-  </testsuite>
-  <testsuite name="Full Workflow Integration Tests" errors="0" failures="8" skipped="0" timestamp="2025-07-16T18:46:06" time="70.292" tests="8">
-    <testcase classname="Full Workflow Integration Tests Complete Application Flow should complete full initialization and detection workflow" name="Full Workflow Integration Tests Complete Application Flow should complete full initialization and detection workflow" time="10.007">
+    <testcase classname="Integration Tests with WASM should complete full detection workflow with WASM backend" name="Integration Tests with WASM should complete full detection workflow with WASM backend" time="10">
       <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
 Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:34:5)
+    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:319:3)
     at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
     at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:33:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
+    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/unit/wasmMigration.test.js:318:1)
     at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
     at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
     at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
     at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
     at processTicksAndRejections (node:internal/process/task_queues:105:5)
     at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)</failure>
     </testcase>
-    <testcase classname="Full Workflow Integration Tests Complete Application Flow should handle user interaction flow" name="Full Workflow Integration Tests Complete Application Flow should handle user interaction flow" time="10.002">
-      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
-Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:71:5)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:33:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
-    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
-    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
-    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Full Workflow Integration Tests Multi-Face Detection Workflow should handle detection of multiple faces" name="Full Workflow Integration Tests Multi-Face Detection Workflow should handle detection of multiple faces" time="10.007">
-      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
-Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:116:5)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:115:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
-    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
-    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
-    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Full Workflow Integration Tests Mode Switching Workflow should switch between lite and pro modes during runtime" name="Full Workflow Integration Tests Mode Switching Workflow should switch between lite and pro modes during runtime" time="10.002">
-      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
-Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:154:5)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:153:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
-    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
-    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
-    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Full Workflow Integration Tests Error Recovery Workflow should recover from temporary detection errors" name="Full Workflow Integration Tests Error Recovery Workflow should recover from temporary detection errors" time="10.005">
-      <failure>Error: Temporary error
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:217:33)
-    at /workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/jest-mock/build/index.js:305:39
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/jest-mock/build/index.js:312:13)
-    at Object.mockConstructor [as detectAllFaces] (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/jest-mock/build/index.js:102:19)
-    at FaceDetectionApp.detectAllFaces (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:278:38)
-    at FaceDetectionApp.call [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:232:44)
-    at detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:253:20)
-    at callTimer (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:806:24)
-    at doTickInner (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1413:29)
-    at doTick (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1494:20)
-    at Object.tick (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1502:20)
-    at FakeTimers.advanceTimersByTime (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@jest/fake-timers/build/index.js:576:19)
-    at Object.advanceTimersByTime (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:2027:26)
-    at Object.advanceTimersByTime (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:241:12)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>Error: Temporary error
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:217:33)
-    at /workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/jest-mock/build/index.js:305:39
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/jest-mock/build/index.js:312:13)
-    at Object.mockConstructor [as detectAllFaces] (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/jest-mock/build/index.js:102:19)
-    at FaceDetectionApp.detectAllFaces (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:278:38)
-    at FaceDetectionApp.call [as detectFaces] (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:232:44)
-    at detectFaces (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:253:20)
-    at callTimer (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:806:24)
-    at doTickInner (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1413:29)
-    at doTick (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1494:20)
-    at Object.tick (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1502:20)
-    at FakeTimers.advanceTimersByTime (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/@jest/environment-jsdom-abstract/node_modules/@jest/fake-timers/build/index.js:576:19)
-    at Object.advanceTimersByTime (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:2027:26)
-    at Object.advanceTimersByTime (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:241:12)
-    at Promise.then.completed (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/utils.js:231:10)
-    at _callCircusTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:316:40)
-    at _runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:252:3)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:126:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at _runTestsForDescribeBlock (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:121:9)
-    at run (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/run.js:71:3)
-    at runAndTransformResultsToJestFormat (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
-Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:207:5)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:206:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
-    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
-    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
-    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Full Workflow Integration Tests Performance Under Load should maintain responsiveness with continuous detection" name="Full Workflow Integration Tests Performance Under Load should maintain responsiveness with continuous detection" time="10.006">
-      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
-Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:255:5)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:254:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
-    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
-    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
-    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Full Workflow Integration Tests State Management should maintain consistent state throughout lifecycle" name="Full Workflow Integration Tests State Management should maintain consistent state throughout lifecycle" time="0.018">
-      <failure>Error: Camera access denied or not available: Camera access error: getUserMedia is not supported in this browser
-    at FaceDetectionApp.setupCamera (/workspaces/face-detection/face-detection-repo/docker-app/src/index.js:196:13)
-    at Object.&lt;anonymous&gt; (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:312:7)</failure>
-    </testcase>
-    <testcase classname="Full Workflow Integration Tests Resource Cleanup should properly clean up resources on app teardown" name="Full Workflow Integration Tests Resource Cleanup should properly clean up resources on app teardown" time="10.001">
-      <failure>Error: thrown: &quot;Exceeded timeout of 10000 ms for a test.
-Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
-    at test (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:330:5)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:329:3)
-    at _dispatchDescribe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:91:26)
-    at describe (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/index.js:55:5)
-    at Object.describe (/workspaces/face-detection/face-detection-repo/docker-app/tests/integration/fullWorkflow.test.js:16:1)
-    at Runtime._execModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1439:24)
-    at Runtime._loadModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:1022:12)
-    at Runtime.requireModule (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runtime/build/index.js:882:12)
-    at jestAdapter (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:77:13)
-    at processTicksAndRejections (node:internal/process/task_queues:105:5)
-    at runTestInternal (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:367:16)
-    at runTest (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/runTest.js:444:34)
-    at Object.worker (/workspaces/face-detection/face-detection-repo/docker-app/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    <testcase classname="Integration Tests with WASM should maintain real-time performance" name="Integration Tests with WASM should maintain real-time performance" time="5.028">
     </testcase>
   </testsuite>
 </testsuites>

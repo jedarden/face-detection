@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { CDPSessionEvent } from '../api/CDPSession.js';
-import { EventEmitter, EventSubscription } from '../common/EventEmitter.js';
+import { EventEmitter } from '../common/EventEmitter.js';
 import { NetworkManagerEvent, } from '../common/NetworkManagerEvents.js';
 import { debugError, isString } from '../common/util.js';
 import { assert } from '../util/assert.js';
 import { DisposableStack } from '../util/disposable.js';
+import { isErrorLike } from '../util/ErrorLike.js';
+import { isTargetClosedError } from './Connection.js';
 import { CdpHTTPRequest } from './HTTPRequest.js';
 import { CdpHTTPResponse } from './HTTPResponse.js';
 import { NetworkEventManager, } from './NetworkEventManager.js';
@@ -16,11 +18,10 @@ import { NetworkEventManager, } from './NetworkEventManager.js';
  * @internal
  */
 export class NetworkManager extends EventEmitter {
-    #ignoreHTTPSErrors;
     #frameManager;
     #networkEventManager = new NetworkEventManager();
     #extraHTTPHeaders;
-    #credentials;
+    #credentials = null;
     #attemptedAuthentications = new Set();
     #userRequestInterceptionEnabled = false;
     #protocolRequestInterceptionEnabled = false;
@@ -40,37 +41,44 @@ export class NetworkManager extends EventEmitter {
         [CDPSessionEvent.Disconnected, this.#removeClient],
     ];
     #clients = new Map();
-    constructor(ignoreHTTPSErrors, frameManager) {
+    #networkEnabled = true;
+    constructor(frameManager, networkEnabled) {
         super();
-        this.#ignoreHTTPSErrors = ignoreHTTPSErrors;
         this.#frameManager = frameManager;
+        this.#networkEnabled = networkEnabled ?? true;
+    }
+    #canIgnoreError(error) {
+        return (isErrorLike(error) &&
+            (isTargetClosedError(error) || error.message.includes('Not supported')));
     }
     async addClient(client) {
-        if (this.#clients.has(client)) {
+        if (!this.#networkEnabled || this.#clients.has(client)) {
             return;
         }
         const subscriptions = new DisposableStack();
         this.#clients.set(client, subscriptions);
+        const clientEmitter = subscriptions.use(new EventEmitter(client));
         for (const [event, handler] of this.#handlers) {
-            subscriptions.use(
-            // TODO: Remove any here.
-            new EventSubscription(client, event, (arg) => {
+            clientEmitter.on(event, (arg) => {
                 return handler.bind(this)(client, arg);
-            }));
+            });
         }
-        await Promise.all([
-            this.#ignoreHTTPSErrors
-                ? client.send('Security.setIgnoreCertificateErrors', {
-                    ignore: true,
-                })
-                : null,
-            client.send('Network.enable'),
-            this.#applyExtraHTTPHeaders(client),
-            this.#applyNetworkConditions(client),
-            this.#applyProtocolCacheDisabled(client),
-            this.#applyProtocolRequestInterception(client),
-            this.#applyUserAgent(client),
-        ]);
+        try {
+            await Promise.all([
+                client.send('Network.enable'),
+                this.#applyExtraHTTPHeaders(client),
+                this.#applyNetworkConditions(client),
+                this.#applyProtocolCacheDisabled(client),
+                this.#applyProtocolRequestInterception(client),
+                this.#applyUserAgent(client),
+            ]);
+        }
+        catch (error) {
+            if (this.#canIgnoreError(error)) {
+                return;
+            }
+            throw error;
+        }
     }
     async #removeClient(client) {
         this.#clients.get(client)?.dispose();
@@ -85,22 +93,30 @@ export class NetworkManager extends EventEmitter {
         this.#protocolRequestInterceptionEnabled = enabled;
         await this.#applyToAllClients(this.#applyProtocolRequestInterception.bind(this));
     }
-    async setExtraHTTPHeaders(extraHTTPHeaders) {
-        this.#extraHTTPHeaders = {};
-        for (const key of Object.keys(extraHTTPHeaders)) {
-            const value = extraHTTPHeaders[key];
+    async setExtraHTTPHeaders(headers) {
+        const extraHTTPHeaders = {};
+        for (const [key, value] of Object.entries(headers)) {
             assert(isString(value), `Expected value of header "${key}" to be String, but "${typeof value}" is found.`);
-            this.#extraHTTPHeaders[key.toLowerCase()] = value;
+            extraHTTPHeaders[key.toLowerCase()] = value;
         }
+        this.#extraHTTPHeaders = extraHTTPHeaders;
         await this.#applyToAllClients(this.#applyExtraHTTPHeaders.bind(this));
     }
     async #applyExtraHTTPHeaders(client) {
         if (this.#extraHTTPHeaders === undefined) {
             return;
         }
-        await client.send('Network.setExtraHTTPHeaders', {
-            headers: this.#extraHTTPHeaders,
-        });
+        try {
+            await client.send('Network.setExtraHTTPHeaders', {
+                headers: this.#extraHTTPHeaders,
+            });
+        }
+        catch (error) {
+            if (this.#canIgnoreError(error)) {
+                return;
+            }
+            throw error;
+        }
     }
     extraHTTPHeaders() {
         return Object.assign({}, this.#extraHTTPHeaders);
@@ -149,12 +165,20 @@ export class NetworkManager extends EventEmitter {
         if (this.#emulatedNetworkConditions === undefined) {
             return;
         }
-        await client.send('Network.emulateNetworkConditions', {
-            offline: this.#emulatedNetworkConditions.offline,
-            latency: this.#emulatedNetworkConditions.latency,
-            uploadThroughput: this.#emulatedNetworkConditions.upload,
-            downloadThroughput: this.#emulatedNetworkConditions.download,
-        });
+        try {
+            await client.send('Network.emulateNetworkConditions', {
+                offline: this.#emulatedNetworkConditions.offline,
+                latency: this.#emulatedNetworkConditions.latency,
+                uploadThroughput: this.#emulatedNetworkConditions.upload,
+                downloadThroughput: this.#emulatedNetworkConditions.download,
+            });
+        }
+        catch (error) {
+            if (this.#canIgnoreError(error)) {
+                return;
+            }
+            throw error;
+        }
     }
     async setUserAgent(userAgent, userAgentMetadata) {
         this.#userAgent = userAgent;
@@ -165,10 +189,18 @@ export class NetworkManager extends EventEmitter {
         if (this.#userAgent === undefined) {
             return;
         }
-        await client.send('Network.setUserAgentOverride', {
-            userAgent: this.#userAgent,
-            userAgentMetadata: this.#userAgentMetadata,
-        });
+        try {
+            await client.send('Network.setUserAgentOverride', {
+                userAgent: this.#userAgent,
+                userAgentMetadata: this.#userAgentMetadata,
+            });
+        }
+        catch (error) {
+            if (this.#canIgnoreError(error)) {
+                return;
+            }
+            throw error;
+        }
     }
     async setCacheEnabled(enabled) {
         this.#userCacheDisabled = !enabled;
@@ -187,29 +219,45 @@ export class NetworkManager extends EventEmitter {
         if (this.#userCacheDisabled === undefined) {
             this.#userCacheDisabled = false;
         }
-        if (this.#protocolRequestInterceptionEnabled) {
-            await Promise.all([
-                this.#applyProtocolCacheDisabled(client),
-                client.send('Fetch.enable', {
-                    handleAuthRequests: true,
-                    patterns: [{ urlPattern: '*' }],
-                }),
-            ]);
+        try {
+            if (this.#protocolRequestInterceptionEnabled) {
+                await Promise.all([
+                    this.#applyProtocolCacheDisabled(client),
+                    client.send('Fetch.enable', {
+                        handleAuthRequests: true,
+                        patterns: [{ urlPattern: '*' }],
+                    }),
+                ]);
+            }
+            else {
+                await Promise.all([
+                    this.#applyProtocolCacheDisabled(client),
+                    client.send('Fetch.disable'),
+                ]);
+            }
         }
-        else {
-            await Promise.all([
-                this.#applyProtocolCacheDisabled(client),
-                client.send('Fetch.disable'),
-            ]);
+        catch (error) {
+            if (this.#canIgnoreError(error)) {
+                return;
+            }
+            throw error;
         }
     }
     async #applyProtocolCacheDisabled(client) {
         if (this.#userCacheDisabled === undefined) {
             return;
         }
-        await client.send('Network.setCacheDisabled', {
-            cacheDisabled: this.#userCacheDisabled,
-        });
+        try {
+            await client.send('Network.setCacheDisabled', {
+                cacheDisabled: this.#userCacheDisabled,
+            });
+        }
+        catch (error) {
+            if (this.#canIgnoreError(error)) {
+                return;
+            }
+            throw error;
+        }
     }
     #onRequestWillBeSent(client, event) {
         // Request interception doesn't happen for data URLs with Network Service.
@@ -308,7 +356,7 @@ export class NetworkManager extends EventEmitter {
         this.emit(NetworkManagerEvent.Request, request);
         void request.finalizeInterceptions();
     }
-    #onRequest(client, event, fetchRequestId) {
+    #onRequest(client, event, fetchRequestId, fromMemoryCache = false) {
         let redirectChain = [];
         if (event.redirectResponse) {
             // We want to emit a response and requestfinished for the
@@ -343,19 +391,32 @@ export class NetworkManager extends EventEmitter {
             ? this.#frameManager.frame(event.frameId)
             : null;
         const request = new CdpHTTPRequest(client, frame, fetchRequestId, this.#userRequestInterceptionEnabled, event, redirectChain);
+        request._fromMemoryCache = fromMemoryCache;
         this.#networkEventManager.storeRequest(event.requestId, request);
         this.emit(NetworkManagerEvent.Request, request);
         void request.finalizeInterceptions();
     }
-    #onRequestServedFromCache(_client, event) {
-        const request = this.#networkEventManager.getRequest(event.requestId);
+    #onRequestServedFromCache(client, event) {
+        const requestWillBeSentEvent = this.#networkEventManager.getRequestWillBeSent(event.requestId);
+        let request = this.#networkEventManager.getRequest(event.requestId);
+        // Requests served from memory cannot be intercepted.
         if (request) {
             request._fromMemoryCache = true;
         }
+        // If request ended up being served from cache, we need to convert
+        // requestWillBeSentEvent to a HTTP request.
+        if (!request && requestWillBeSentEvent) {
+            this.#onRequest(client, requestWillBeSentEvent, undefined, true);
+            request = this.#networkEventManager.getRequest(event.requestId);
+        }
+        if (!request) {
+            debugError(new Error(`Request ${event.requestId} was served from cache but we could not find the corresponding request object`));
+            return;
+        }
         this.emit(NetworkManagerEvent.RequestServedFromCache, request);
     }
-    #handleRequestRedirect(client, request, responsePayload, extraInfo) {
-        const response = new CdpHTTPResponse(client, request, responsePayload, extraInfo);
+    #handleRequestRedirect(_client, request, responsePayload, extraInfo) {
+        const response = new CdpHTTPResponse(request, responsePayload, extraInfo);
         request._response = response;
         request._redirectChain.push(request);
         response._resolveBody(new Error('Response body is unavailable for redirect responses'));
@@ -363,7 +424,7 @@ export class NetworkManager extends EventEmitter {
         this.emit(NetworkManagerEvent.Response, response);
         this.emit(NetworkManagerEvent.RequestFinished, request);
     }
-    #emitResponseEvent(client, responseReceived, extraInfo) {
+    #emitResponseEvent(_client, responseReceived, extraInfo) {
         const request = this.#networkEventManager.getRequest(responseReceived.requestId);
         // FileUpload sends a response without a matching request.
         if (!request) {
@@ -380,7 +441,7 @@ export class NetworkManager extends EventEmitter {
         if (responseReceived.response.fromDiskCache) {
             extraInfo = null;
         }
-        const response = new CdpHTTPResponse(client, request, responseReceived.response, extraInfo);
+        const response = new CdpHTTPResponse(request, responseReceived.response, extraInfo);
         request._response = response;
         this.emit(NetworkManagerEvent.Response, response);
     }
@@ -418,10 +479,10 @@ export class NetworkManager extends EventEmitter {
             this.#networkEventManager.forgetQueuedEventGroup(event.requestId);
             this.#emitResponseEvent(client, queuedEvents.responseReceivedEvent, event);
             if (queuedEvents.loadingFinishedEvent) {
-                this.#emitLoadingFinished(queuedEvents.loadingFinishedEvent);
+                this.#emitLoadingFinished(client, queuedEvents.loadingFinishedEvent);
             }
             if (queuedEvents.loadingFailedEvent) {
-                this.#emitLoadingFailed(queuedEvents.loadingFailedEvent);
+                this.#emitLoadingFailed(client, queuedEvents.loadingFailedEvent);
             }
             return;
         }
@@ -429,16 +490,17 @@ export class NetworkManager extends EventEmitter {
         this.#networkEventManager.responseExtraInfo(event.requestId).push(event);
     }
     #forgetRequest(request, events) {
-        const requestId = request._requestId;
+        const requestId = request.id;
         const interceptionId = request._interceptionId;
         this.#networkEventManager.forgetRequest(requestId);
-        interceptionId !== undefined &&
+        if (interceptionId !== undefined) {
             this.#attemptedAuthentications.delete(interceptionId);
+        }
         if (events) {
             this.#networkEventManager.forget(requestId);
         }
     }
-    #onLoadingFinished(_client, event) {
+    #onLoadingFinished(client, event) {
         // If the response event for this request is still waiting on a
         // corresponding ExtraInfo event, then wait to emit this event too.
         const queuedEvents = this.#networkEventManager.getQueuedEventGroup(event.requestId);
@@ -446,16 +508,17 @@ export class NetworkManager extends EventEmitter {
             queuedEvents.loadingFinishedEvent = event;
         }
         else {
-            this.#emitLoadingFinished(event);
+            this.#emitLoadingFinished(client, event);
         }
     }
-    #emitLoadingFinished(event) {
+    #emitLoadingFinished(client, event) {
         const request = this.#networkEventManager.getRequest(event.requestId);
         // For certain requestIds we never receive requestWillBeSent event.
         // @see https://crbug.com/750469
         if (!request) {
             return;
         }
+        this.#adoptCdpSessionIfNeeded(client, request);
         // Under certain conditions we never get the Network.responseReceived
         // event from protocol. @see https://crbug.com/883475
         if (request.response()) {
@@ -464,7 +527,7 @@ export class NetworkManager extends EventEmitter {
         this.#forgetRequest(request, true);
         this.emit(NetworkManagerEvent.RequestFinished, request);
     }
-    #onLoadingFailed(_client, event) {
+    #onLoadingFailed(client, event) {
         // If the response event for this request is still waiting on a
         // corresponding ExtraInfo event, then wait to emit this event too.
         const queuedEvents = this.#networkEventManager.getQueuedEventGroup(event.requestId);
@@ -472,16 +535,17 @@ export class NetworkManager extends EventEmitter {
             queuedEvents.loadingFailedEvent = event;
         }
         else {
-            this.#emitLoadingFailed(event);
+            this.#emitLoadingFailed(client, event);
         }
     }
-    #emitLoadingFailed(event) {
+    #emitLoadingFailed(client, event) {
         const request = this.#networkEventManager.getRequest(event.requestId);
         // For certain requestIds we never receive requestWillBeSent event.
         // @see https://crbug.com/750469
         if (!request) {
             return;
         }
+        this.#adoptCdpSessionIfNeeded(client, request);
         request._failureText = event.errorText;
         const response = request.response();
         if (response) {
@@ -489,6 +553,17 @@ export class NetworkManager extends EventEmitter {
         }
         this.#forgetRequest(request, true);
         this.emit(NetworkManagerEvent.RequestFailed, request);
+    }
+    #adoptCdpSessionIfNeeded(client, request) {
+        // Document requests for OOPIFs start in the parent frame but are
+        // adopted by their child frame, meaning their loadingFinished and
+        // loadingFailed events are fired on the child session. In this case
+        // we reassign the request CDPSession to ensure all subsequent
+        // actions use the correct session (e.g. retrieving response body in
+        // HTTPResponse). The same applies to main worker script requests.
+        if (client !== request.client) {
+            request.client = client;
+        }
     }
 }
 //# sourceMappingURL=NetworkManager.js.map

@@ -1,9 +1,10 @@
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
+import { appConfig } from './config.js';
 
 export class FaceDetector {
   constructor(options = {}) {
     this.options = {
-      modelPath: options.modelPath || '/models',
+      modelPath: options.modelPath || appConfig.getModelUrl(),
       detectionThreshold: options.detectionThreshold || 0.5,
       inputSize: options.inputSize || 416,
       ...options

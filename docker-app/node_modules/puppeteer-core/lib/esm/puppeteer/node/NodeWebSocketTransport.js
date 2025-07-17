@@ -14,6 +14,7 @@ export class NodeWebSocketTransport {
             const ws = new NodeWebSocket(url, [], {
                 followRedirects: true,
                 perMessageDeflate: false,
+                allowSynchronousEvents: false,
                 maxPayload: 256 * 1024 * 1024, // 256Mb
                 headers: {
                     'User-Agent': `Puppeteer ${packageVersion}`,

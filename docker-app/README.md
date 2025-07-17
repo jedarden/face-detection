@@ -1,20 +1,27 @@
-# 🎯 Face Detection Docker App
+# 🎯 Face Detection Docker App (v2.0.0 - WASM Edition)
 
-A containerized face detection application using face-api.js, built with modern web technologies and served through Docker.
+A high-performance containerized face detection application powered by WebAssembly (WASM), featuring 8-20X faster inference on CPU devices and consistent cross-platform performance.
 
 ## ✨ Features
 
+- **🚀 WebAssembly (WASM) Powered** - 8-20X faster inference than JavaScript
+- **🔄 Runtime Backend Selection** - Switch between WASM, WebGL, and CPU
 - Real-time face detection using webcam
 - **📹 Multiple camera support** - Switch between available cameras
-- **🎯 Two detection modes:**
-  - **🚀 Lite Mode**: Fast bounding box detection only (30 FPS)
-  - **⚡ Pro Mode**: Advanced features with landmarks, expressions, age/gender (15-20 FPS)
+- **🎯 Three detection modes:**
+  - **🚀 Lite Mode**: Fast bounding box detection only (30+ FPS with WASM)
+  - **⚡ Pro Mode**: Advanced features with landmarks, expressions, age/gender (20+ FPS)
+  - **💪 Full Mode**: All features enabled
 - Face landmarks detection (68 points)
 - Facial expression recognition
 - Age and gender estimation
+- **🔧 Runtime prefix configuration** - Deploy with custom URL prefixes
+- **⚡ SIMD Support** - Additional 2-3X speedup when available
+- **🔀 Multi-threading** - Parallel execution with SharedArrayBuffer
 - Dockerized for easy deployment
 - Multi-stage Docker build for optimized image size
 - Development and production configurations
+- Health checks and monitoring endpoints
 
 ## 📁 Project Structure
 
@@ -113,6 +120,7 @@ Features:
 - Gzip compression enabled
 - Health check endpoint
 - Optimized for caching
+- **Runtime prefix configuration support**
 
 ### 🔧 Development Dockerfile
 
@@ -168,6 +176,72 @@ Use the threshold slider to adjust detection sensitivity (0.1 to 0.9):
 - Modern browser with WebRTC support
 - Camera/webcam access
 - JavaScript enabled
+
+## 🔧 Runtime Prefix Configuration
+
+The Docker image supports configurable URL prefixes that can be set at runtime:
+
+### Basic Usage
+
+```bash
+# Without prefix (default)
+docker run -p 8080:8080 face-detection-app
+# Access: http://localhost:8080/
+
+# With custom prefix
+docker run -p 8080:8080 -e APP_PREFIX="/face-detection" face-detection-app
+# Access: http://localhost:8080/face-detection/
+```
+
+### Multi-Instance Deployment
+
+```bash
+# Deploy multiple instances with different prefixes
+docker run -d -p 8081:8080 -e APP_PREFIX="/tenant-a" --name app-a face-detection-app
+docker run -d -p 8082:8080 -e APP_PREFIX="/tenant-b" --name app-b face-detection-app
+```
+
+### Features
+
+- **Runtime Configuration**: No need to rebuild image for different prefixes
+- **Automatic URL Generation**: All assets and API calls respect the prefix
+- **Health Check Support**: `/health` endpoint always available without prefix
+- **Reverse Proxy Ready**: Perfect for multi-tenant deployments
+
+See `README-PREFIX.md` for detailed configuration examples and troubleshooting.
+
+## 🚀 WebAssembly (WASM) Performance
+
+### Why WASM?
+
+The v2.0.0 release introduces WebAssembly optimization for dramatic performance improvements:
+
+- **8-20X faster** inference on CPU-only devices
+- **Consistent performance** across different browsers
+- **Better compatibility** - works without WebGL
+- **Lower memory usage** - efficient linear memory model
+
+### Backend Comparison
+
+| Feature | JavaScript | WebGL | WASM | WASM+SIMD |
+|---------|-----------|-------|------|-----------|
+| CPU Inference | 200-400ms | N/A | 20-50ms | 15-35ms |
+| GPU Required | No | Yes | No | No |
+| Browser Support | All | Most | All Modern | Chrome 91+ |
+| Memory Usage | High | Medium | Low | Low |
+| Consistency | Variable | GPU-dependent | High | High |
+
+### Enabling WASM
+
+WASM is enabled by default. Users can switch backends via the UI:
+
+1. Look for the "Backend" dropdown in the control panel
+2. Select between WASM, WebGL, or CPU
+3. The app will reload models with the selected backend
+
+For optimal performance, use Chrome 91+ or Firefox 89+ to enable SIMD support.
+
+See `WASM-MIGRATION.md` for technical details and migration guide.
 
 ## 🔒 Security Considerations
 

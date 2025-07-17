@@ -8,6 +8,7 @@ import type {Protocol} from 'devtools-protocol';
 
 import {type CDPSession, CDPSessionEvent} from '../api/CDPSession.js';
 import {FrameEvent} from '../api/Frame.js';
+import type {NewDocumentScriptEvaluation} from '../api/Page.js';
 import {EventEmitter} from '../common/EventEmitter.js';
 import type {TimeoutSettings} from '../common/TimeoutSettings.js';
 import {debugError, PuppeteerURL, UTILITY_WORLD_NAME} from '../common/util.js';
@@ -16,7 +17,9 @@ import {Deferred} from '../util/Deferred.js';
 import {disposeSymbol} from '../util/disposable.js';
 import {isErrorLike} from '../util/ErrorLike.js';
 
-import {CdpCDPSession} from './CDPSession.js';
+import type {Binding} from './Binding.js';
+import {CdpPreloadScript} from './CdpPreloadScript.js';
+import type {CdpCDPSession} from './CdpSession.js';
 import {isTargetClosedError} from './Connection.js';
 import {DeviceRequestPromptManager} from './DeviceRequestPrompt.js';
 import {ExecutionContext} from './ExecutionContext.js';
@@ -41,9 +44,10 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
   #page: CdpPage;
   #networkManager: NetworkManager;
   #timeoutSettings: TimeoutSettings;
-  #contextIdToContext = new Map<string, ExecutionContext>();
   #isolatedWorlds = new Set<string>();
-  #client: CDPSession;
+  #client: CdpCDPSession;
+  #scriptsToEvaluateOnNewDocument = new Map<string, CdpPreloadScript>();
+  #bindings = new Set<Binding>();
 
   _frameTree = new FrameTree<CdpFrame>();
 
@@ -69,20 +73,22 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
     return this.#networkManager;
   }
 
-  get client(): CDPSession {
+  get client(): CdpCDPSession {
     return this.#client;
   }
 
   constructor(
-    client: CDPSession,
+    client: CdpCDPSession,
     page: CdpPage,
-    ignoreHTTPSErrors: boolean,
-    timeoutSettings: TimeoutSettings
+    timeoutSettings: TimeoutSettings,
   ) {
     super();
     this.#client = client;
     this.#page = page;
-    this.#networkManager = new NetworkManager(ignoreHTTPSErrors, this);
+    this.#networkManager = new NetworkManager(
+      this,
+      page.browser().isNetworkEnabled(),
+    );
     this.#timeoutSettings = timeoutSettings;
     this.setupEventListeners(this.#client);
     client.once(CDPSessionEvent.Disconnected, () => {
@@ -100,6 +106,14 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
     if (!mainFrame) {
       return;
     }
+
+    if (!this.#page.browser().connected) {
+      // If the browser is not connected we know
+      // that activation will not happen
+      this.#removeFramesRecursively(mainFrame);
+      return;
+    }
+
     for (const child of mainFrame.childFrames()) {
       this.#removeFramesRecursively(child);
     }
@@ -112,7 +126,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
     });
     try {
       await swapped.valueOrThrow();
-    } catch (err) {
+    } catch {
       this.#removeFramesRecursively(mainFrame);
     }
   }
@@ -122,29 +136,21 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
    * we maintain the main frame object identity while updating
    * its frame tree and ID.
    */
-  async swapFrameTree(client: CDPSession): Promise<void> {
-    this.#onExecutionContextsCleared(this.#client);
-
+  async swapFrameTree(client: CdpCDPSession): Promise<void> {
     this.#client = client;
-    assert(
-      this.#client instanceof CdpCDPSession,
-      'CDPSession is not an instance of CDPSessionImpl.'
-    );
     const frame = this._frameTree.getMainFrame();
     if (frame) {
-      this.#frameNavigatedReceived.add(this.#client._target()._targetId);
+      this.#frameNavigatedReceived.add(this.#client.target()._targetId);
       this._frameTree.removeFrame(frame);
-      frame.updateId(this.#client._target()._targetId);
-      frame.mainRealm().clearContext();
-      frame.isolatedRealm().clearContext();
+      frame.updateId(this.#client.target()._targetId);
       this._frameTree.addFrame(frame);
-      frame.updateClient(client, true);
+      frame.updateClient(client);
     }
     this.setupEventListeners(client);
     client.once(CDPSessionEvent.Disconnected, () => {
       this.#onClientDisconnect().catch(debugError);
     });
-    await this.initialize(client);
+    await this.initialize(client, frame);
     await this.#networkManager.addClient(client);
     if (frame) {
       frame.emit(FrameEvent.FrameSwappedByActivation, undefined);
@@ -175,9 +181,9 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
         await this.#frameTreeHandled?.valueOrThrow();
         this.#onFrameDetached(
           event.frameId,
-          event.reason as Protocol.Page.FrameDetachedEventReason
+          event.reason as Protocol.Page.FrameDetachedEventReason,
         );
-      }
+      },
     );
     session.on('Page.frameStartedLoading', async event => {
       await this.#frameTreeHandled?.valueOrThrow();
@@ -191,26 +197,18 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
       await this.#frameTreeHandled?.valueOrThrow();
       this.#onExecutionContextCreated(event.context, session);
     });
-    session.on('Runtime.executionContextDestroyed', async event => {
-      await this.#frameTreeHandled?.valueOrThrow();
-      this.#onExecutionContextDestroyed(event.executionContextId, session);
-    });
-    session.on('Runtime.executionContextsCleared', async () => {
-      await this.#frameTreeHandled?.valueOrThrow();
-      this.#onExecutionContextsCleared(session);
-    });
     session.on('Page.lifecycleEvent', async event => {
       await this.#frameTreeHandled?.valueOrThrow();
       this.#onLifecycleEvent(event);
     });
   }
 
-  async initialize(client: CDPSession): Promise<void> {
+  async initialize(client: CDPSession, frame?: CdpFrame | null): Promise<void> {
     try {
       this.#frameTreeHandled?.resolve();
       this.#frameTreeHandled = Deferred.create();
       // We need to schedule all these commands while the target is paused,
-      // therefore, it needs to happen synchroniously. At the same time we
+      // therefore, it needs to happen synchronously. At the same time we
       // should not start processing execution context and frame events before
       // we received the initial information about the frame tree.
       await Promise.all([
@@ -224,6 +222,15 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
         client.send('Runtime.enable').then(() => {
           return this.#createIsolatedWorld(client, UTILITY_WORLD_NAME);
         }),
+        ...(frame
+          ? Array.from(this.#scriptsToEvaluateOnNewDocument.values())
+          : []
+        ).map(script => {
+          return frame?.addPreloadScript(script);
+        }),
+        ...(frame ? Array.from(this.#bindings.values()) : []).map(binding => {
+          return frame?.addExposedFunctionBinding(binding);
+        }),
       ]);
     } catch (error) {
       this.#frameTreeHandled?.resolve();
@@ -234,22 +241,6 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
 
       throw error;
     }
-  }
-
-  executionContextById(
-    contextId: number,
-    session: CDPSession = this.#client
-  ): ExecutionContext {
-    const context = this.getExecutionContextById(contextId, session);
-    assert(context, 'INTERNAL ERROR: missing context with id = ' + contextId);
-    return context;
-  }
-
-  getExecutionContextById(
-    contextId: number,
-    session: CDPSession = this.#client
-  ): ExecutionContext | undefined {
-    return this.#contextIdToContext.get(`${session.id()}:${contextId}`);
   }
 
   page(): CdpPage {
@@ -270,6 +261,76 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
     return this._frameTree.getById(frameId) || null;
   }
 
+  async addExposedFunctionBinding(binding: Binding): Promise<void> {
+    this.#bindings.add(binding);
+    await Promise.all(
+      this.frames().map(async frame => {
+        return await frame.addExposedFunctionBinding(binding);
+      }),
+    );
+  }
+
+  async removeExposedFunctionBinding(binding: Binding): Promise<void> {
+    this.#bindings.delete(binding);
+    await Promise.all(
+      this.frames().map(async frame => {
+        return await frame.removeExposedFunctionBinding(binding);
+      }),
+    );
+  }
+
+  async evaluateOnNewDocument(
+    source: string,
+  ): Promise<NewDocumentScriptEvaluation> {
+    const {identifier} = await this.mainFrame()
+      ._client()
+      .send('Page.addScriptToEvaluateOnNewDocument', {
+        source,
+      });
+
+    const preloadScript = new CdpPreloadScript(
+      this.mainFrame(),
+      identifier,
+      source,
+    );
+
+    this.#scriptsToEvaluateOnNewDocument.set(identifier, preloadScript);
+
+    await Promise.all(
+      this.frames().map(async frame => {
+        return await frame.addPreloadScript(preloadScript);
+      }),
+    );
+
+    return {identifier};
+  }
+
+  async removeScriptToEvaluateOnNewDocument(identifier: string): Promise<void> {
+    const preloadScript = this.#scriptsToEvaluateOnNewDocument.get(identifier);
+    if (!preloadScript) {
+      throw new Error(
+        `Script to evaluate on new document with id ${identifier} not found`,
+      );
+    }
+
+    this.#scriptsToEvaluateOnNewDocument.delete(identifier);
+
+    await Promise.all(
+      this.frames().map(frame => {
+        const identifier = preloadScript.getIdForFrame(frame);
+        if (!identifier) {
+          return;
+        }
+        return frame
+          ._client()
+          .send('Page.removeScriptToEvaluateOnNewDocument', {
+            identifier,
+          })
+          .catch(debugError);
+      }),
+    );
+  }
+
   onAttachedToTarget(target: CdpTarget): void {
     if (target._getTargetInfo().type !== 'iframe') {
       return;
@@ -280,7 +341,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
       frame.updateClient(target._session()!);
     }
     this.setupEventListeners(target._session()!);
-    void this.initialize(target._session()!);
+    void this.initialize(target._session()!, frame);
   }
 
   _deviceRequestPromptManager(client: CDPSession): DeviceRequestPromptManager {
@@ -322,13 +383,13 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
 
   #handleFrameTree(
     session: CDPSession,
-    frameTree: Protocol.Page.FrameTree
+    frameTree: Protocol.Page.FrameTree,
   ): void {
     if (frameTree.frame.parentId) {
       this.#onFrameAttached(
         session,
         frameTree.frame.id,
-        frameTree.frame.parentId
+        frameTree.frame.parentId,
       );
     }
     if (!this.#frameNavigatedReceived.has(frameTree.frame.id)) {
@@ -349,14 +410,15 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
   #onFrameAttached(
     session: CDPSession,
     frameId: string,
-    parentFrameId: string
+    parentFrameId: string,
   ): void {
     let frame = this.frame(frameId);
     if (frame) {
-      if (session && frame.isOOPFrame()) {
-        // If an OOP iframes becomes a normal iframe again
-        // it is first attached to the parent page before
-        // the target is removed.
+      const parentFrame = this.frame(parentFrameId);
+      if (session && parentFrame && frame.client !== parentFrame?.client) {
+        // If an OOP iframes becomes a normal iframe
+        // again it is first attached to the parent frame before the
+        // target is removed.
         frame.updateClient(session);
       }
       return;
@@ -369,7 +431,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
 
   async #onFrameNavigated(
     framePayload: Protocol.Page.Frame,
-    navigationType: Protocol.Page.NavigationType
+    navigationType: Protocol.Page.NavigationType,
   ): Promise<void> {
     const frameId = framePayload.id;
     const isMainFrame = !framePayload.parentId;
@@ -429,7 +491,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
               grantUniveralAccess: true,
             })
             .catch(debugError);
-        })
+        }),
     );
 
     this.#isolatedWorlds.add(key);
@@ -449,7 +511,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
 
   #onFrameDetached(
     frameId: string,
-    reason: Protocol.Page.FrameDetachedEventReason
+    reason: Protocol.Page.FrameDetachedEventReason,
   ): void {
     const frame = this.frame(frameId);
     if (!frame) {
@@ -471,7 +533,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
 
   #onExecutionContextCreated(
     contextPayload: Protocol.Runtime.ExecutionContextDescription,
-    session: CDPSession
+    session: CDPSession,
   ): void {
     const auxData = contextPayload.auxData as {frameId?: string} | undefined;
     const frameId = auxData && auxData.frameId;
@@ -484,10 +546,7 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
       }
       if (contextPayload.auxData && contextPayload.auxData['isDefault']) {
         world = frame.worlds[MAIN_WORLD];
-      } else if (
-        contextPayload.name === UTILITY_WORLD_NAME &&
-        !frame.worlds[PUPPETEER_WORLD].hasContext()
-      ) {
+      } else if (contextPayload.name === UTILITY_WORLD_NAME) {
         // In case of multiple sessions to the same target, there's a race between
         // connections so we might end up creating multiple isolated worlds.
         // We can use either.
@@ -501,42 +560,9 @@ export class FrameManager extends EventEmitter<FrameManagerEvents> {
     const context = new ExecutionContext(
       frame?.client || this.#client,
       contextPayload,
-      world
+      world,
     );
-    if (world) {
-      world.setContext(context);
-    }
-    const key = `${session.id()}:${contextPayload.id}`;
-    this.#contextIdToContext.set(key, context);
-  }
-
-  #onExecutionContextDestroyed(
-    executionContextId: number,
-    session: CDPSession
-  ): void {
-    const key = `${session.id()}:${executionContextId}`;
-    const context = this.#contextIdToContext.get(key);
-    if (!context) {
-      return;
-    }
-    this.#contextIdToContext.delete(key);
-    if (context._world) {
-      context._world.clearContext();
-    }
-  }
-
-  #onExecutionContextsCleared(session: CDPSession): void {
-    for (const [key, context] of this.#contextIdToContext.entries()) {
-      // Make sure to only clear execution contexts that belong
-      // to the current session.
-      if (context._client !== session) {
-        continue;
-      }
-      if (context._world) {
-        context._world.clearContext();
-      }
-      this.#contextIdToContext.delete(key);
-    }
+    world.setContext(context);
   }
 
   #removeFramesRecursively(frame: CdpFrame): void {

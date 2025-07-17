@@ -1,0 +1,9 @@
+{
+  "backend": "wasm",
+  "features": {
+    "simd": true,
+    "threads": true
+  },
+  "fallback": "webgl",
+  "modelPath": "/models"
+}

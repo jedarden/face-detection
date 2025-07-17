@@ -1,3 +1,8 @@
+/**
+ * @license
+ * Copyright 2024 Google Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import type { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping.js';
 import type { Connection } from '../cdp/Connection.js';
 import { EventEmitter, type EventType } from '../common/EventEmitter.js';
@@ -60,10 +65,10 @@ export interface CommandOptions {
  * @example
  *
  * ```ts
- * const client = await page.target().createCDPSession();
+ * const client = await page.createCDPSession();
  * await client.send('Animation.enable');
  * client.on('Animation.animationCreated', () =>
- *   console.log('Animation created!')
+ *   console.log('Animation created!'),
  * );
  * const response = await client.send('Animation.getPlaybackRate');
  * console.log('playback rate is ' + response.playbackRate);
@@ -79,7 +84,18 @@ export declare abstract class CDPSession extends EventEmitter<CDPSessionEvents> 
      * @internal
      */
     constructor();
+    /**
+     * The underlying connection for this session, if any.
+     *
+     * @public
+     */
     abstract connection(): Connection | undefined;
+    /**
+     * True if the session has been detached, false otherwise.
+     *
+     * @public
+     */
+    abstract get detached(): boolean;
     /**
      * Parent session in terms of CDP's auto-attach mechanism.
      *

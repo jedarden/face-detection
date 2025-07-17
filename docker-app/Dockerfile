@@ -34,9 +34,13 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -out /etc/nginx/ssl/selfsigned.crt \
     -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
 
-# Copy nginx configurations
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy nginx template and configurations
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
 COPY nginx-ssl.conf /etc/nginx/conf.d/ssl.conf
+
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -96,5 +100,5 @@ LABEL maintainer="Face Detection App Team" \
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD /usr/local/bin/health-check || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use custom entrypoint for runtime configuration
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

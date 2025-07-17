@@ -1,10 +1,11 @@
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 import './styles.css';
 import { LiteModeDetector } from './liteMode.js';
 import { ProMode } from './proMode.js';
 import { CameraManager } from './cameraUtils.js';
 import { DrawingUtils } from './drawingUtils.js';
 import { PerformanceMonitor } from './performanceMonitor.js';
+import { appConfig } from './config.js';
 
 export class FaceDetectionApp {
   constructor() {
@@ -61,10 +62,11 @@ export class FaceDetectionApp {
   }
 
   async loadModels() {
-    const MODEL_URL = '/models';
+    const MODEL_URL = appConfig.getModelUrl();
     
     try {
-      console.log('Loading face detection models...');
+      console.log('Loading face detection models from:', MODEL_URL);
+      console.log('App configuration:', appConfig.debug());
       
       // Load only the models we actually have
       await Promise.all([
