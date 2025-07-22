@@ -55,7 +55,7 @@ http {
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; media-src 'self' blob:; worker-src 'self' blob:;" always;
+    add_header Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https:; media-src 'self' blob:; worker-src 'self' blob:;" always;
 
     server {
         listen 8080;
@@ -72,30 +72,31 @@ http {
             add_header Cache-Control "public, immutable";
         }
 
-        # Specific handling for face-api.js model files (with prefix support)
-        location ${APP_PREFIX}/models/ {
-            alias /usr/share/nginx/html/models/;
+        # Specific handling for face-api.js model files
+        location /models/ {
             add_header Access-Control-Allow-Origin *;
             expires 1y;
             add_header Cache-Control "public, immutable";
         }
 
-        # Health check endpoint (no prefix needed)
+        # SPA fallback
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Health check endpoint
         location /health {
             access_log off;
             return 200 "OK\n";
             add_header Content-Type text/plain;
         }
 
-        # Performance metrics endpoint (no prefix needed)
+        # Performance metrics endpoint
         location /metrics {
             access_log off;
             return 200 "nginx_up 1\nnginx_requests_total $request_completion\nnginx_connections_active $connections_active\n";
             add_header Content-Type text/plain;
         }
-
-        # Conditional prefix handling
-        ${APP_PREFIX_BLOCK}
 
         # Deny access to hidden files
         location ~ /\. {
