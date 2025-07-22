@@ -20,7 +20,7 @@ env:
 
 jobs:
   security-scan:
-    runs-on: ubuntu-latest
+    runs-on: apexalgo-iad-runners
     permissions:
       contents: read
       security-events: write
