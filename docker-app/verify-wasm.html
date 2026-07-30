@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WASM Verification Tool</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .feature-card.active {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+        .feature-card.inactive {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 WASM Verification Tool</h1>
+        <p>This tool helps verify that WebAssembly (WASM) is properly configured and running in your browser.</p>
+        
+        <div id="results"></div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="testTensorFlow()">Test TensorFlow.js</button>
+            <button onclick="benchmarkWASM()">Benchmark WASM</button>
+        </div>
+        
+        <div id="performance" style="margin-top: 30px;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@4.22.0"></script>
+    <script>
+        const results = document.getElementById('results');
+        const performance = document.getElementById('performance');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function clear() {
+            results.innerHTML = '';
+            performance.innerHTML = '';
+        }
+
+        async function checkWebAssembly() {
+            log('<h3>WebAssembly Support Check</h3>', 'info');
+            
+            if (typeof WebAssembly === 'object') {
+                log('✅ WebAssembly is supported', 'success');
+                
+                // Check specific features
+                const features = {
+                    instantiate: typeof WebAssembly.instantiate === 'function',
+                    instantiateStreaming: typeof WebAssembly.instantiateStreaming === 'function',
+                    compile: typeof WebAssembly.compile === 'function',
+                    validate: typeof WebAssembly.validate === 'function'
+                };
+                
+                log('WebAssembly API features: ' + JSON.stringify(features, null, 2), 'info');
+            } else {
+                log('❌ WebAssembly is NOT supported', 'error');
+                return false;
+            }
+            
+            // Check SIMD support
+            try {
+                const simdTest = new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,11]);
+                const simdSupported = WebAssembly.validate(simdTest);
+                if (simdSupported) {
+                    log('✅ SIMD instructions are supported (2-3X speedup)', 'success');
+                } else {
+                    log('⚠️ SIMD instructions are NOT supported', 'warning');
+                }
+            } catch (e) {
+                log('⚠️ Could not detect SIMD support', 'warning');
+            }
+            
+            // Check SharedArrayBuffer (threads)
+            if (typeof SharedArrayBuffer !== 'undefined') {
+                log('✅ SharedArrayBuffer is available (multi-threading enabled)', 'success');
+            } else {
+                log('⚠️ SharedArrayBuffer is NOT available (single-threaded mode)', 'warning');
+            }
+            
+            return true;
+        }
+
+        async function testTensorFlow() {
+            clear();
+            log('<h3>TensorFlow.js Backend Test</h3>', 'info');
+            
+            try {
+                // Check available backends
+                const backends = tf.engine().registryFactory;
+                log('Available backends: ' + Object.keys(backends).join(', '), 'info');
+                
+                // Set WASM backend
+                log('Setting WASM backend...', 'info');
+                await tf.setBackend('wasm');
+                await tf.ready();
+                
+                const currentBackend = tf.getBackend();
+                if (currentBackend === 'wasm') {
+                    log(`✅ WASM backend is ACTIVE: ${currentBackend}`, 'success');
+                } else {
+                    log(`❌ Expected WASM but got: ${currentBackend}`, 'error');
+                }
+                
+                // Show TensorFlow.js version
+                log(`TensorFlow.js version: ${tf.version.tfjs}`, 'info');
+                
+                // Test basic operation
+                const a = tf.tensor2d([[1, 2], [3, 4]]);
+                const b = tf.tensor2d([[5, 6], [7, 8]]);
+                const c = tf.matMul(a, b);
+                const result = await c.data();
+                log('Matrix multiplication test passed: ' + Array.from(result), 'success');
+                
+                // Clean up
+                a.dispose();
+                b.dispose();
+                c.dispose();
+                
+            } catch (error) {
+                log('❌ TensorFlow.js test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function benchmarkWASM() {
+            clear();
+            log('<h3>WASM Performance Benchmark</h3>', 'info');
+            
+            const sizes = [10, 50, 100, 200];
+            const results = {};
+            
+            for (const backend of ['cpu', 'wasm']) {
+                try {
+                    await tf.setBackend(backend);
+                    await tf.ready();
+                    
+                    log(`\nTesting ${backend.toUpperCase()} backend...`, 'info');
+                    results[backend] = {};
+                    
+                    for (const size of sizes) {
+                        const a = tf.randomNormal([size, size]);
+                        const b = tf.randomNormal([size, size]);
+                        
+                        // Warm up
+                        const warmup = tf.matMul(a, b);
+                        await warmup.data();
+                        warmup.dispose();
+                        
+                        // Benchmark
+                        const iterations = 10;
+                        const start = performance.now();
+                        
+                        for (let i = 0; i < iterations; i++) {
+                            const c = tf.matMul(a, b);
+                            await c.data();
+                            c.dispose();
+                        }
+                        
+                        const end = performance.now();
+                        const avgTime = (end - start) / iterations;
+                        results[backend][size] = avgTime;
+                        
+                        log(`${size}x${size} MatMul: ${avgTime.toFixed(2)}ms`, backend === 'wasm' ? 'success' : 'warning');
+                        
+                        a.dispose();
+                        b.dispose();
+                    }
+                } catch (error) {
+                    log(`Failed to test ${backend}: ${error.message}`, 'error');
+                }
+            }
+            
+            // Show speedup
+            if (results.cpu && results.wasm) {
+                log('\n<h4>Performance Comparison</h4>', 'info');
+                const table = '<table style="width:100%; margin-top:10px; border-collapse: collapse;">' +
+                    '<tr><th>Size</th><th>CPU (ms)</th><th>WASM (ms)</th><th>Speedup</th></tr>' +
+                    sizes.map(size => {
+                        const cpu = results.cpu[size];
+                        const wasm = results.wasm[size];
+                        const speedup = cpu / wasm;
+                        return `<tr>
+                            <td>${size}x${size}</td>
+                            <td>${cpu.toFixed(2)}</td>
+                            <td>${wasm.toFixed(2)}</td>
+                            <td style="color: ${speedup > 1 ? 'green' : 'red'}">${speedup.toFixed(1)}x</td>
+                        </tr>`;
+                    }).join('') +
+                    '</table>';
+                
+                performance.innerHTML = table;
+                
+                const avgSpeedup = sizes.reduce((sum, size) => 
+                    sum + results.cpu[size] / results.wasm[size], 0) / sizes.length;
+                
+                log(`\n🎯 Average WASM speedup: ${avgSpeedup.toFixed(1)}x faster than CPU`, 'success');
+            }
+        }
+
+        async function runAllTests() {
+            clear();
+            await checkWebAssembly();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testTensorFlow();
+            
+            // Show feature grid
+            const features = {
+                'WebAssembly': typeof WebAssembly === 'object',
+                'SIMD': WebAssembly.validate && WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,11])),
+                'SharedArrayBuffer': typeof SharedArrayBuffer !== 'undefined',
+                'TF.js WASM': tf.getBackend() === 'wasm'
+            };
+            
+            const grid = document.createElement('div');
+            grid.className = 'feature-grid';
+            grid.innerHTML = Object.entries(features).map(([name, supported]) => 
+                `<div class="feature-card ${supported ? 'active' : 'inactive'}">
+                    <h4>${name}</h4>
+                    <div style="font-size: 24px;">${supported ? '✅' : '❌'}</div>
+                </div>`
+            ).join('');
+            
+            results.appendChild(grid);
+        }
+
+        // Run tests on load
+        window.addEventListener('load', runAllTests);
+    </script>
+</body>
+</html>

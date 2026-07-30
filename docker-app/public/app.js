@@ -48,8 +48,6 @@ function initializeApp() {
       <h1>Face Detection App</h1>
       <div class="video-container">
         <video id="video" autoplay muted></video>
-      </div>
-      <div class="canvas-container">
         <canvas id="overlay"></canvas>
       </div>
       <div class="controls">

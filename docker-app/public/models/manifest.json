@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-07-16T18:42:30.203Z",
+  "timestamp": "2025-07-17T11:47:31.815Z",
   "models": [
     "tiny_face_detector_model-weights_manifest.json",
     "tiny_face_detector_model-shard1",
@@ -15,5 +15,5 @@
     "age_gender_model-weights_manifest.json",
     "age_gender_model-shard1"
   ],
-  "totalSize": 7059507
+  "totalSize": 7060162
 }

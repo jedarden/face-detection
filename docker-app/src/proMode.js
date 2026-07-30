@@ -3,8 +3,9 @@
  * Advanced features including landmarks, expressions, age/gender estimation
  */
 
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 import { drawLandmarks, drawFaceContours, drawExpressions, drawAgeGender } from './landmarkDrawing';
+import { appConfig } from './config.js';
 
 export class ProMode {
   constructor() {
@@ -40,7 +41,8 @@ export class ProMode {
 
     this.modelPromise = (async () => {
       try {
-        const MODEL_URL = '/models';
+        const MODEL_URL = appConfig.getModelUrl();
+        console.log('Pro mode loading models from:', MODEL_URL);
         
         // Load all required models for Pro mode
         await Promise.all([

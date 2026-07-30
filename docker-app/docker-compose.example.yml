@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Face Detection App without prefix (default deployment)
+  face-detection-default:
+    build: .
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Face Detection App with custom prefix
+  face-detection-prefixed:
+    build: .
+    ports:
+      - "8081:8080"
+    environment:
+      - APP_PREFIX=/face-detection
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Multiple instances with different prefixes (for multi-tenant scenarios)
+  face-detection-tenant-a:
+    build: .
+    ports:
+      - "8082:8080"
+    environment:
+      - APP_PREFIX=/tenant-a
+    restart: unless-stopped
+
+  face-detection-tenant-b:
+    build: .
+    ports:
+      - "8083:8080"
+    environment:
+      - APP_PREFIX=/tenant-b
+    restart: unless-stopped
+
+  # Example with reverse proxy (nginx)
+  reverse-proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - face-detection-prefixed
+      - face-detection-tenant-a
+      - face-detection-tenant-b
+    restart: unless-stopped
+
+# Example networks for service isolation
+networks:
+  face-detection-network:
+    driver: bridge
+
+# Example volumes for persistent data (if needed)
+volumes:
+  face-detection-data:
+    driver: local

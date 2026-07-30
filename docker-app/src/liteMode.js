@@ -2,7 +2,7 @@ import FaceDetector from './faceDetection.js';
 import { DrawingUtils } from './drawingUtils.js';
 import { CameraManager } from './cameraUtils.js';
 import { PerformanceMonitor } from './performanceMonitor.js';
-import * as faceapi from 'face-api.js';
+import * as faceapi from '@vladmandic/face-api';
 
 export class LiteModeDetector {
   constructor(options = {}) {
