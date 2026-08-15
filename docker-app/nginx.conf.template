@@ -117,8 +117,9 @@ http {
         # Health check endpoint
         location /health {
             access_log off;
-            return 200 "OK\n";
-            add_header Content-Type text/plain;
+            default_type application/json;
+            add_header Cache-Control "no-store" always;
+            return 200 '{"status":"healthy","version":"1.0.0","timestamp":"$time_iso8601","services":{"nginx":"running","face-detection":"available"},"features":{"lite_mode":true,"pro_mode":true,"tensorflow_js":true,"face_api_js":true}}';
         }
 
         # Performance metrics endpoint

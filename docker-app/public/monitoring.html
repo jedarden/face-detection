@@ -164,6 +164,19 @@
                 </div>
                 <div class="metric-value" id="app-status">Healthy</div>
             </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <span id="models-indicator" class="status-indicator status-warning"></span>
+                    Model Assets
+                </div>
+                <div class="metric-value" id="models-status">Checking</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Last Health Check</div>
+                <div class="metric-value" id="health-timestamp">Waiting</div>
+            </div>
             
             <div class="metric-card">
                 <div class="metric-label">Uptime</div>
@@ -225,6 +238,7 @@
         // Simulated metrics (in production, these would come from real endpoints)
         let startTime = Date.now();
         let requestCount = 0;
+        let lastHealthSummary = '';
         
         function updateMetrics() {
             // Update uptime
@@ -243,7 +257,7 @@
             }
         }
         
-        function addLogEntry() {
+        function addLogEntry(message) {
             const logs = document.getElementById('logs');
             const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
             const messages = [
@@ -255,11 +269,11 @@
                 'Lite mode activated',
                 'Pro mode processing initiated'
             ];
-            const message = messages[Math.floor(Math.random() * messages.length)];
+            const logMessage = message || messages[Math.floor(Math.random() * messages.length)];
             
             const entry = document.createElement('div');
             entry.className = 'log-entry';
-            entry.textContent = `[${timestamp}] ${message}`;
+            entry.textContent = `[${timestamp}] ${logMessage}`;
             
             logs.insertBefore(entry, logs.firstChild);
             
@@ -282,21 +296,62 @@
         
         // Check real health endpoint
         async function checkHealth() {
+            const statusEl = document.getElementById('app-status');
+            const indicator = statusEl.previousElementSibling.querySelector('.status-indicator');
+            const modelsEl = document.getElementById('models-status');
+            const modelsIndicator = document.getElementById('models-indicator');
+            const timestampEl = document.getElementById('health-timestamp');
+
             try {
-                const response = await fetch('/health');
-                const text = await response.text();
-                const statusEl = document.getElementById('app-status');
-                const indicator = statusEl.previousElementSibling.querySelector('.status-indicator');
-                
-                if (response.ok) {
-                    statusEl.textContent = 'Healthy';
-                    indicator.className = 'status-indicator status-healthy';
-                } else {
-                    statusEl.textContent = 'Error';
-                    indicator.className = 'status-indicator status-error';
+                const response = await fetch('/health', { cache: 'no-store' });
+                const health = await response.json();
+                const isHealthy = response.ok && health.status === 'healthy';
+                const displayStatus = health.status
+                    ? health.status.charAt(0).toUpperCase() + health.status.slice(1)
+                    : `HTTP ${response.status}`;
+
+                statusEl.textContent = displayStatus;
+                indicator.className = `status-indicator status-${isHealthy ? 'healthy' : 'error'}`;
+
+                if (health.timestamp) {
+                    const timestamp = new Date(health.timestamp);
+                    if (!Number.isNaN(timestamp.getTime())) {
+                        timestampEl.textContent = timestamp.toLocaleTimeString();
+                        timestampEl.title = timestamp.toISOString();
+                    }
+                }
+
+                const serviceSummary = Object.entries(health.services || {})
+                    .map(([name, state]) => `${name}: ${state}`)
+                    .join(', ');
+                const healthSummary = `${displayStatus}${serviceSummary ? ` (${serviceSummary})` : ''}`;
+                if (healthSummary !== lastHealthSummary) {
+                    addLogEntry(`Health check: ${healthSummary}`);
+                    lastHealthSummary = healthSummary;
                 }
             } catch (error) {
+                statusEl.textContent = 'Unavailable';
+                indicator.className = 'status-indicator status-error';
+                timestampEl.textContent = 'Unavailable';
+                if (lastHealthSummary !== 'Unavailable') {
+                    addLogEntry('Health check unavailable');
+                    lastHealthSummary = 'Unavailable';
+                }
                 console.error('Health check failed:', error);
+            }
+
+            try {
+                const modelsResponse = await fetch('/models/manifest.json', { cache: 'no-store' });
+                const manifest = await modelsResponse.json();
+                const modelCount = Array.isArray(manifest.models) ? manifest.models.length : 0;
+                const modelsAvailable = modelsResponse.ok && modelCount > 0;
+
+                modelsEl.textContent = modelsAvailable ? `${modelCount} available` : 'Unavailable';
+                modelsIndicator.className = `status-indicator status-${modelsAvailable ? 'healthy' : 'error'}`;
+            } catch (error) {
+                modelsEl.textContent = 'Unavailable';
+                modelsIndicator.className = 'status-indicator status-error';
+                console.error('Model manifest check failed:', error);
             }
         }
         
