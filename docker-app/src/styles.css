@@ -125,6 +125,15 @@ h1 {
   background-color: #c0392b;
 }
 
+.btn-snapshot {
+  background-color: #27ae60;
+  color: white;
+}
+
+.btn-snapshot:hover:not(:disabled) {
+  background-color: #219a52;
+}
+
 .stats {
   background-color: white;
   padding: 20px;

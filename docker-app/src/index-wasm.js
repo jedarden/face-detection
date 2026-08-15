@@ -13,6 +13,7 @@ import { DrawingUtils } from './drawingUtils.js';
 import { PerformanceMonitor } from './performanceMonitor.js';
 import { appConfig } from './config.js';
 import { initializeWASMBackend, getBackendPerformance, BackendMonitor } from './wasmBackend.js';
+import { registerServiceWorker } from './registerServiceWorker.js';
 
 export class FaceDetectionApp {
   constructor(options = {}) {
@@ -191,6 +192,7 @@ export class FaceDetectionApp {
           </div>
           <button id="startBtn" class="btn btn-primary">Start Detection</button>
           <button id="stopBtn" class="btn btn-secondary" disabled>Stop Detection</button>
+          <button id="snapshotBtn" class="btn btn-snapshot">Save Snapshot</button>
           <div id="camera-selector" class="camera-selector" style="display: none;">
             <label for="cameraSelect">Camera:</label>
             <select id="cameraSelect">
@@ -220,6 +222,7 @@ export class FaceDetectionApp {
     // Event listeners
     document.getElementById('startBtn').onclick = () => this.startDetection();
     document.getElementById('stopBtn').onclick = () => this.stopDetection();
+    document.getElementById('snapshotBtn').onclick = () => this.saveSnapshot();
     
     // Mode switching
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
@@ -718,10 +721,52 @@ export class FaceDetectionApp {
       maxResults: 10
     };
   }
+
+  saveSnapshot() {
+    if (!this.video || !this.canvas) {
+      console.error('Video or canvas not available for snapshot');
+      return;
+    }
+
+    // Create an offscreen canvas with the same dimensions as the video
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = this.video.videoWidth;
+    offscreenCanvas.height = this.video.videoHeight;
+    const ctx = offscreenCanvas.getContext('2d');
+
+    // Draw the video frame first (mirror it horizontally to match the display)
+    ctx.save();
+    ctx.translate(offscreenCanvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(this.video, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+    ctx.restore();
+
+    // Draw the overlay canvas on top (also mirrored to match)
+    ctx.save();
+    ctx.translate(offscreenCanvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(this.canvas, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+    ctx.restore();
+
+    // Convert to PNG and trigger download
+    const dataURL = offscreenCanvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.download = `face-detection-snapshot-${timestamp}.png`;
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    console.log('Snapshot saved successfully');
+  }
 }
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+  // Register service worker for offline capability and precaching
+  registerServiceWorker();
+
   const app = new FaceDetectionApp();
   app.init();
   // Expose app instance for testing
