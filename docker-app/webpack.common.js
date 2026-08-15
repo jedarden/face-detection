@@ -52,11 +52,14 @@ module.exports = {
             ignore: ['**/index.html', '**/favicon.ico'],
           },
         },
-        // Note: face-api.js weights are already in public/models
-        // {
-        //   from: 'node_modules/face-api.js/weights',
-        //   to: 'models',
-        // },
+        // Vendor TensorFlow.js WASM binaries for self-hosted build
+        {
+          from: 'node_modules/@tensorflow/tfjs-backend-wasm/dist',
+          to: 'wasm',
+          globOptions: {
+            ignore: ['**/*.js', '**/*.json'], // Only copy .wasm files
+          },
+        },
       ],
     }),
   ],

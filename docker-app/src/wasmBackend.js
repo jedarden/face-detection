@@ -11,9 +11,8 @@ import { setWasmPaths, setThreadsCount } from '@tensorflow/tfjs-backend-wasm';
  * Configure WASM paths for model loading
  */
 export function configureWASMPaths() {
-  // Use CDN for WASM files or local path if available
-  const wasmPath = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@latest/dist/';
-  setWasmPaths(wasmPath);
+  // Use self-hosted WASM files vendored at build time
+  setWasmPaths('/wasm/');
 }
 
 /**
