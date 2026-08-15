@@ -18,17 +18,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load the face detection models
     const MODEL_URL = '/models';
     console.log('Loading models from:', MODEL_URL);
-    
-    await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-      faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-      faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
-    ]);
-    
-    console.log('Models loaded successfully!');
-    
+
+    // Load only tinyFaceDetector eagerly (for Lite Mode default)
+    // Pro-mode models will be loaded on-demand when switching to Pro Mode
+    console.log('Loading Lite Mode model: tinyFaceDetector');
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    console.log('Lite Mode model loaded successfully (tinyFaceDetector only)');
+    console.log('Pro-mode models (ssdMobilenetv1, landmarks, expressions, age/gender) will be loaded on-demand');
+
     // Initialize the application UI
     initializeApp();
     
@@ -151,6 +148,7 @@ function initializeApp() {
   let currentStream = null;
   let currentMode = 'lite';
   let availableCameras = [];
+  let proModelsLoaded = false;
   
   // Diagnostic state
   let diagnosticsEnabled = false;
@@ -178,9 +176,26 @@ function initializeApp() {
   
   // Mode selector
   document.querySelectorAll('input[name="mode"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      currentMode = e.target.value;
-      console.log('Mode changed to:', currentMode);
+    radio.addEventListener('change', async (e) => {
+      const newMode = e.target.value;
+      console.log('Mode changed to:', newMode);
+
+      // Load Pro-mode models on-demand when switching to Pro Mode
+      if (newMode === 'pro' && !proModelsLoaded) {
+        showLoadingIndicator('Loading Pro-mode models...');
+        try {
+          await loadProModeModels();
+          proModelsLoaded = true;
+        } catch (error) {
+          console.error('Failed to load Pro-mode models:', error);
+          showError('Failed to load Pro-mode models. Please refresh and try again.');
+          return;
+        } finally {
+          hideLoadingIndicator();
+        }
+      }
+
+      currentMode = newMode;
     });
   });
   
@@ -614,6 +629,73 @@ function initializeApp() {
   }
 
   console.log('App initialized successfully!');
+}
+
+async function loadProModeModels() {
+  const MODEL_URL = '/models';
+  console.log('Loading Pro-mode models from:', MODEL_URL);
+
+  try {
+    await Promise.all([
+      faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+    ]);
+
+    console.log('Pro-mode models loaded successfully');
+  } catch (error) {
+    console.error('Failed to load Pro-mode models:', error);
+    throw error;
+  }
+}
+
+function showLoadingIndicator(message) {
+  const existingIndicator = document.getElementById('loading-indicator');
+  if (existingIndicator) return;
+
+  const app = document.getElementById('app');
+  const indicator = document.createElement('div');
+  indicator.id = 'loading-indicator';
+  indicator.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    z-index: 10000;
+    text-align: center;
+    font-size: 16px;
+  `;
+  indicator.innerHTML = `
+    <div style="margin-bottom: 10px;">${message}</div>
+    <div style="border: 3px solid #f3f3f3; border-top: 3px solid #00ff00; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+  `;
+
+  // Add CSS animation if not already present
+  if (!document.getElementById('loading-spinner-style')) {
+    const style = document.createElement('style');
+    style.id = 'loading-spinner-style';
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  app.appendChild(indicator);
+}
+
+function hideLoadingIndicator() {
+  const indicator = document.getElementById('loading-indicator');
+  if (indicator) {
+    indicator.remove();
+  }
 }
 
 function showError(message) {

@@ -111,32 +111,48 @@ export class FaceDetectionApp {
 
   async loadModels() {
     const MODEL_URL = appConfig.getModelUrl();
-    
+
     try {
       console.log('Loading face detection models from:', MODEL_URL);
       console.log('App configuration:', appConfig.debug());
       console.log('Using backend:', this.backendType);
-      
-      // Load models with progress tracking
-      const modelPromises = [
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-        faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
-      ];
-      
-      await Promise.all(modelPromises);
-      
+
+      // Load only tinyFaceDetector eagerly (for Lite Mode default)
+      // Pro-mode models will be loaded on-demand when switching to Pro Mode
+      console.log('Loading Lite Mode model: tinyFaceDetector');
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+
       this.isModelLoaded = true;
-      console.log('Face detection models loaded successfully');
-      
+      console.log('Lite Mode model loaded successfully (tinyFaceDetector only)');
+      console.log('Pro-mode models (ssdMobilenetv1, landmarks, expressions, age/gender) will be loaded on-demand');
+
       // Log backend performance after model loading
       const perfInfo = getBackendPerformance();
       console.log('Backend performance:', perfInfo);
     } catch (error) {
       console.error('Failed to load models:', error);
       throw new Error('Failed to load face detection models: ' + error.message);
+    }
+  }
+
+  async loadProModeModels() {
+    const MODEL_URL = appConfig.getModelUrl();
+
+    try {
+      console.log('Loading Pro-mode models from:', MODEL_URL);
+
+      // Load Pro-mode models on-demand
+      await Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+      ]);
+
+      console.log('Pro-mode models loaded successfully');
+    } catch (error) {
+      console.error('Failed to load Pro-mode models:', error);
+      throw new Error('Failed to load Pro-mode models: ' + error.message);
     }
   }
 
@@ -467,17 +483,17 @@ export class FaceDetectionApp {
 
   async switchMode(mode) {
     this.stopDetection();
-    
+
     if (this.currentMode === 'lite' && this.liteModeDetector) {
       await this.liteModeDetector.cleanup();
       this.liteModeDetector = null;
     } else if (this.currentMode === 'pro' && this.proMode) {
       this.proMode = null;
     }
-    
+
     this.currentMode = mode;
     console.log(`Switching to ${mode} mode`);
-    
+
     try {
       if (mode === 'lite') {
         this.liteModeDetector = new LiteModeDetector({
@@ -491,11 +507,20 @@ export class FaceDetectionApp {
         this.isModelLoaded = true;
         this.isVideoReady = true;
       } else if (mode === 'pro') {
+        // Show loading indicator for Pro-mode models
+        this.showLoadingIndicator('Loading Pro-mode models...');
+
+        // Load Pro-mode models on-demand (ssdMobilenetv1, landmarks, expressions, age/gender)
+        await this.loadProModeModels();
+
         this.proMode = new ProMode();
+        // Note: ProMode.loadModels() checks if models are already loaded and skips them
         await this.proMode.loadModels();
         this.isModelLoaded = true;
         this.isVideoReady = true;
         this.setupProModeControls();
+
+        this.hideLoadingIndicator();
       } else {
         if (!this.isModelLoaded) {
           await this.loadModels();
@@ -506,7 +531,50 @@ export class FaceDetectionApp {
       }
     } catch (error) {
       console.error('Failed to switch mode:', error);
+      this.hideLoadingIndicator();
       this.showError('Failed to switch mode. Please try again.');
+    }
+  }
+
+  showLoadingIndicator(message) {
+    const existingIndicator = document.getElementById('loading-indicator');
+    if (existingIndicator) return;
+
+    const app = document.getElementById('app');
+    const indicator = document.createElement('div');
+    indicator.id = 'loading-indicator';
+    indicator.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 10px;
+      z-index: 10000;
+      text-align: center;
+      font-size: 16px;
+    `;
+    indicator.innerHTML = `
+      <div style="margin-bottom: 10px;">${message}</div>
+      <div style="border: 3px solid #f3f3f3; border-top: 3px solid #00ff00; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    `;
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `);
+    app.appendChild(indicator);
+  }
+
+  hideLoadingIndicator() {
+    const indicator = document.getElementById('loading-indicator');
+    if (indicator) {
+      indicator.remove();
     }
   }
 
