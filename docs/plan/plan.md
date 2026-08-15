@@ -17,8 +17,6 @@ learning approaches) that predates this doc.
 - **`research/face-detection-lite/`**, **`research/face-detection-pro/`** —
   research notes and standalone browser demos (`python3 -m http.server`), not
   deployed.
-- **`tools/`** (per README) — unrelated YouTube transcript downloader scripts,
-  bundled in the same repo.
 
 ## Live deployment
 

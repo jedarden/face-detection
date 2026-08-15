@@ -12,14 +12,7 @@ All known security vulnerabilities have been patched in version 1.1.0. The appli
 
 ## 📁 Repository Structure
 
-### 1. 🛠️ `/tools` - YouTube Transcript Tools
-A collection of Python tools for downloading transcripts from YouTube videos:
-- Single video transcript downloader
-- Bulk transcript processor
-- Playlist transcript downloader
-- Support for multiple languages and formats
-
-### 2. 🔬 `/research/face-detection-lite` - Research & Web Demo
+### 1. 🔬 `/research/face-detection-lite` - Research & Web Demo
 Comprehensive research on face detection algorithms with a working web demonstration:
 - **Research**: Deep dive into Viola-Jones, HOG, and deep learning approaches
 - **Implementation**: Browser-based face detection using face-api.js
@@ -32,7 +25,7 @@ Comprehensive research on face detection algorithms with a working web demonstra
 - Optional landmarks, expressions, age/gender detection
 - Comprehensive performance optimization guide
 
-### 3. 🐳 `/docker-app` - Production Docker Application
+### 2. 🐳 `/docker-app` - Production Docker Application
 A production-ready Dockerized face detection application with two modes:
 
 #### 🚀 Lite Mode
