@@ -237,3 +237,9 @@ This application was built through an iterative development process using AI-ass
 ---
 
 *Built with a focus on performance, user privacy, and production readiness through AI-assisted iterative development.*
+
+---
+
+Part of [jedarden.com](https://jedarden.com) · Read the write-up: [jedarden.com/projects/face/](https://jedarden.com/projects/face/)
+
+*This GitHub repo is a read-only mirror of git.ardenone.com/jedarden/face-detection — issues and PRs are welcome here either way.*
