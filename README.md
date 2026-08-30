@@ -4,6 +4,8 @@
 
 Browser-based face detection using face-api.js on TensorFlow.js, packaged as a Docker image served by nginx, alongside the research notes and web demo the application grew out of. All inference runs in the browser; the container only serves static files and model weights.
 
+**Live demo:** [face.jedarden.com](https://face.jedarden.com)
+
 ## Security update (v1.1.0)
 
 Version 1.1.0 (commit `fc4209ae`) updated dependencies to address the findings `npm audit` reported at the time; see the [Security Migration Guide](./docker-app/SECURITY_UPDATE_MIGRATION.md). The committed `docker-app/security-audit.json` is a point-in-time audit snapshot (9 findings). Run `npm audit` in `docker-app/` for the current state rather than relying on either.
