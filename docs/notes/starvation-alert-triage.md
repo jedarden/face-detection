@@ -5,6 +5,14 @@ workspace (prefix `facedete`, bead-rs backend). Goal: a starvation alert is
 either **verified false positive → closed with evidence**, or **genuine →
 remediated mechanically**, without the `human` label being the only route.
 
+**This protocol has an executable form:** `scripts/triage-starvation-alerts.sh`
+(bash + jq, no other dependencies) implements steps 1–7 mechanically — label
+detection, payload parsing, live-store verification, the create-then-close
+writability probe, the step-5 verdict table, step-6 bucket remediation, and
+run-log emission (`--append-run-log` appends to this document's run log).
+Prefer running it over re-deriving the steps by hand; this document remains
+the authority the script codifies.
+
 Precedent: `facedete-26dbdeba` (2026-08-28), closed as FALSE POSITIVE using
 steps 2–3 below. The recurring alerts all share one shape — empty workspace
 field, `open: 0 / excluded: 0` counters, label `alert:starvation:unknown`, and
@@ -152,3 +160,5 @@ the automated path.
   8 open / 4 excluded (all `has_dependencies`) / 4 candidates, probe
   `facedete-4ef59e8a` created+closed. Verdict: starvation condition absent;
   nothing to verify-then-close, nothing to remediate.
+- **2026-09-08** (`scripts/triage-starvation-alerts.sh`): step 1 found **0 open `starvation-alert` beads**. Live store: 7 open beads, ready frontier 2 candidate(s) (facedete-1002c031, facedete-0e794da6), doctor all-OK (13 OK checks, advisory-only warnings ignored), diagnostics snapshot: 7 open / 5 excluded / 2 candidates, probe facedete-7ab5508c created+closed. Verdict: starvation condition absent; nothing to verify-then-close, nothing to remediate.
+- **2026-09-08** (`scripts/triage-starvation-alerts.sh`): alert `facedete-ee071d7a` — verdict **verified-false-positive**. Payload open=0/excluded=0, workspace='', ts=2026-08-28T05:01:48.126323508+00:00. live store: 7 open beads, ready frontier 2 candidate(s), doctor all-OK (13 OK checks, advisory-only warnings ignored), probe facedete-65d646b3 created+closed. diagnostics snapshot: 7 open / 5 excluded / 2 candidates.
