@@ -162,3 +162,24 @@ the automated path.
   nothing to verify-then-close, nothing to remediate.
 - **2026-09-08** (`scripts/triage-starvation-alerts.sh`): step 1 found **0 open `starvation-alert` beads**. Live store: 7 open beads, ready frontier 2 candidate(s) (facedete-1002c031, facedete-0e794da6), doctor all-OK (13 OK checks, advisory-only warnings ignored), diagnostics snapshot: 7 open / 5 excluded / 2 candidates, probe facedete-7ab5508c created+closed. Verdict: starvation condition absent; nothing to verify-then-close, nothing to remediate.
 - **2026-09-08** (`scripts/triage-starvation-alerts.sh`): alert `facedete-ee071d7a` — verdict **verified-false-positive**. Payload open=0/excluded=0, workspace='', ts=2026-08-28T05:01:48.126323508+00:00. live store: 7 open beads, ready frontier 2 candidate(s), doctor all-OK (13 OK checks, advisory-only warnings ignored), probe facedete-65d646b3 created+closed. diagnostics snapshot: 7 open / 5 excluded / 2 candidates.
+- **2026-09-08** (bead `facedete-df165826`, emitter-defect coverage check for
+  alert `facedete-0659082b`): **coverage exists — no new bead created.**
+  `bead list --status open --json --limit 500` returned 7 open beads; the
+  self-contradicting-payload defect (hardcoded "open beads exist" assertion /
+  missing 0-0 guard, label `alert:starvation:unknown`, empty workspace field)
+  is covered by open bead **`facedete-1002c031`**, whose item (2) prescribes
+  exactly the 0-0 guard — "if the candidate query returns 0 open beads and 0
+  excluded beads, drop the alert (or emit a self-clearing 'starvation
+  resolved' record)" — and whose notes carry the replay evidence that the 0/0
+  counters were accurate and the open-beads-exist precondition was the false
+  element. Its items (1) and (3) cover the remaining payload defects of this
+  shape (workspace stamping, per-bead exclusion reasons instead of
+  `unknown`). The other six open beads are adjacent scope, not this defect:
+  filing-route `facedete-0443e58c` / `facedete-0e794da6`, filing-time dedup
+  `facedete-e3defbc5`, store-health pre-flight `facedete-0bfcc80a`,
+  verification gates `facedete-631ca636` / `facedete-7837fc00`. Creating the
+  proposed "suppress alert when payload counters are open=0/excluded=0" bead
+  would have duplicated `facedete-1002c031`. Target alert `facedete-0659082b`
+  is closed (verified false positive, payload open=0/excluded=0, ts
+  2026-08-28T05:22:38.267238637+00:00, one of the 34+ sibling false
+  positives) — reproduction recorded here only; no writes to the closed bead.
