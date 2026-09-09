@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-09-09T23:34:06.010440923Z",
+  "total_open_beads": 10,
+  "exclusion_criteria": {
+    "has_assignee": 0,
+    "manually_blocked": 0,
+    "has_dependencies": 6,
+    "resource_conflicts": 0
+  },
+  "final_candidate_count": 4,
+  "excluded_beads": [
+    {
+      "bead_id": "facedete-e3defbc5",
+      "title": "[Unravel] Starvation alert: beads invisible in  — Deduplicate starvation alerts at filing time: update the open starvation-alert bead instead of filing a new one per detection",
+      "priority": 2,
+      "assignee": null,
+      "manual_blocked": false,
+      "has_blockers": true,
+      "blocker_count": 1,
+      "has_resource_conflicts": false,
+      "conflict_count": 0
+    },
+    {
+      "bead_id": "facedete-0443e58c",
+      "title": "[Unravel] Starvation alert: beads invisible in  — File starvation alerts as claimable NEEDLE-internal beads instead of human-labeled beads in the scanned target repo",
+      "priority": 2,
+      "assignee": null,
+      "manual_blocked": false,
+      "has_blockers": true,
+      "blocker_count": 1,
+      "has_resource_conflicts": false,
+      "conflict_count": 0
+    },
+    {
+      "bead_id": "facedete-631ca636",
+      "title": "[Unravel] Starvation alert: beads invisible in  — Prove the false-positive stream ended: replay the recorded degenerate snapshot through the deployed binary and assert no alert bead is filed",
+      "priority": 2,
+      "assignee": null,
+      "manual_blocked": false,
+      "has_blockers": true,
+      "blocker_count": 2,
+      "has_resource_conflicts": false,
+      "conflict_count": 0
+    },
+    {
+      "bead_id": "facedete-0bfcc80a",
+      "title": "[Unravel] Starvation alert: beads invisible in  — Add a store-health pre-flight to the pluck run so an unreadable store can never be classified as starvation",
+      "priority": 2,
+      "assignee": null,
+      "manual_blocked": false,
+      "has_blockers": true,
+      "blocker_count": 1,
+      "has_resource_conflicts": false,
+      "conflict_count": 0
+    },
+    {
+      "bead_id": "facedete-7837fc00",
+      "title": "[Unravel] Starvation alert: beads invisible in  — End-to-end verify the starvation-emitter fix against the historical false-signal inputs (blocked by facedete-1002c031)",
+      "priority": 2,
+      "assignee": null,
+      "manual_blocked": false,
+      "has_blockers": true,
+      "blocker_count": 1,
+      "has_resource_conflicts": false,
+      "conflict_count": 0
+    },
+    {
+      "bead_id": "facedete-e7d6eb6f",
+      "title": "[Unravel] Starvation alert: beads invisible in  — Remove the hardcoded 'open beads exist' fallback prose still at NEEDLE HEAD",
+      "priority": 2,
+      "assignee": null,
+      "manual_blocked": false,
+      "has_blockers": true,
+      "blocker_count": 1,
+      "has_resource_conflicts": false,
+      "conflict_count": 0
+    }
+  ]
+}
