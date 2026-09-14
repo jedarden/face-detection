@@ -1674,3 +1674,5 @@
 {"bead":"facedete-0681f713","duration_ms":3601211,"event":"timeout","exit_code":124,"outcome":"timeout","strand":"explore","ts":"2026-09-08T18:50:21.297741785+00:00","worker":"glm-mta"}
 {"bead":"facedete-b7cd23b5","duration_ms":3604188,"event":"timeout","exit_code":124,"outcome":"timeout","strand":"explore","ts":"2026-09-08T18:53:26.204889083+00:00","worker":"glm-spaxel2"}
 {"bead":"facedete-e7d6eb6f","duration_ms":590857,"event":"complete","exit_code":0,"outcome":"success","strand":"explore","ts":"2026-09-08T18:58:06.357558897+00:00","worker":"glm-roam-16"}
+{"bead":"facedete-0e794da6","event":"claim","strand":"explore","ts":"2026-09-14T10:31:20.511857790+00:00","worker":"glm-roam-24"}
+{"adapter":"claude-code-glm-5.3-flash","attempt_id":"01a09f78-ab98-7a03-8be8-fa01f5d40709","bead":"facedete-0e794da6","event":"dispatch","model":"glm-5.3-flash","strand":"explore","ts":"2026-09-14T10:31:20.728395002+00:00","worker":"glm-roam-24"}

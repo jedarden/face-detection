@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-09-14T08:38:37.337958678Z",
-  "total_open_beads": 10,
+  "timestamp": "2026-09-14T10:39:19.348585077Z",
+  "total_open_beads": 9,
   "exclusion_criteria": {
     "has_assignee": 0,
     "manually_blocked": 0,
     "has_dependencies": 6,
     "resource_conflicts": 0
   },
-  "final_candidate_count": 4,
+  "final_candidate_count": 3,
   "excluded_beads": [
     {
       "bead_id": "facedete-e3defbc5",
