@@ -9,7 +9,10 @@
 #
 # Usage:
 #   scripts/triage-starvation-alerts.sh                     # scan: triage every
-#                                                           # open starvation-alert bead
+#                                                           # open bead carrying the
+#                                                           # `starvation-alert`
+#                                                           # label or titled
+#                                                           # "Starvation alert: ..."
 #   scripts/triage-starvation-alerts.sh --bead <id>         # triage one alert bead
 #                                                           # (open or already closed —
 #                                                           # closed targets get a
@@ -22,12 +25,17 @@
 #                                                           # run-log entry to the
 #                                                           # protocol doc
 #
+# Tests (no store, no network — `bead` is stubbed, jq is real):
+#   scripts/tests/triage-starvation-alerts.test.sh
+#
 # Verdict table (protocol step 5):
 #   payload open=0/excluded=0 + healthy store (doctor all-OK, probe passes)
 #       -> verified false positive (self-contradicting emitter: its own counters
 #          say 0/0 while its precondition asserts "open beads exist")
 #   payload open>0 + non-empty ready frontier -> stale / self-resolved
 #   payload open>0 + empty ready frontier    -> genuine starvation -> step 6
+#   payload open=0 + excluded>0              -> unclassifiable (outside the
+#       step-5 table): alert left open for a human, exit 2
 #
 # Step-6 buckets and their mechanical fixes:
 #   has_assignee       -> bead update <id> --clear-assignee (assigned-but-open
@@ -55,8 +63,6 @@
 #      doctor unhealthy, probe failed, payload unparseable)
 #
 # All progress goes to stderr; evidence and the run-log entry go to stdout.
-
-set -uo pipefail
 
 DOC_REL=docs/notes/starvation-alert-triage.md
 DIAG_REL=.beads/diagnostics/pluck-diagnostics.json
@@ -89,6 +95,15 @@ die() { log "ERROR: $2"; exit "$1"; }
 usage() { awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 2; }
 
 # --------------------------------------------------------------------------
+# Entry point. Guarded so this file can be SOURCED for unit tests
+# (scripts/tests/triage-starvation-alerts.test.sh): sourcing defines the
+# globals and functions above but parses no arguments, touches no store,
+# creates no temp dirs and never runs main.
+# --------------------------------------------------------------------------
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+set -uo pipefail
+
+# --------------------------------------------------------------------------
 # Option parsing
 # --------------------------------------------------------------------------
 while [ $# -gt 0 ]; do
@@ -115,6 +130,7 @@ TMP=$(mktemp -d) || die 2 "mktemp failed"
 trap 'rm -rf "$TMP"' EXIT
 
 [ -f "$DOC_REL" ] || log "note: $DOC_REL not found; --append-run-log would fail"
+fi  # sourced-vs-executed guard (operational setup only)
 
 # `bead list --json` emits one compact object per line (JSONL) for non-empty
 # result sets but a bare `[]` array for empty ones — normalize to strict JSONL
@@ -178,9 +194,14 @@ capture_store() {
            | @tsv' "$TMP/open.jsonl" >"$TMP/open.tsv"
 
     # Per excluded bead (diagnostics): id, assignee, manual_blocked, conflicts.
-    { jq -r '[.bead_id, (.assignee // "-"), (.manual_blocked | tostring),
-               (.has_resource_conflicts | tostring)] | @tsv' "$TMP/diag.json" 2>/dev/null \
-          || true; } | grep -v '^null' >"$TMP/excluded.tsv" || true
+    # excluded_beads is an array INSIDE the diagnostics object — iterate it
+    # explicitly. Projecting at the top level instead yields a single all-null
+    # row (grep -v '^null' then drops it), excluded.tsv stays empty forever,
+    # and classify() can never see has_resource_conflicts.
+    { jq -r '.excluded_beads[]? | [.bead_id, (.assignee // "-"),
+               (.manual_blocked | tostring), (.has_resource_conflicts | tostring)] | @tsv' \
+          "$TMP/diag.json" 2>/dev/null || true; } \
+        | grep -v '^null' >"$TMP/excluded.tsv" || true
 }
 
 # Healthy = doctor exited 0, no FAIL/ERROR lines, and the only WARN lines are
@@ -558,10 +579,21 @@ main() {
 
     case "$MODE" in
         scan)
-            # Step 1 — detect open beads labeled starvation-alert. bead list
-            # has no --label flag, so filter the JSON locally (protocol step 1).
-            jq -c 'select((.labels // []) | index("starvation-alert"))' "$TMP/open.jsonl" \
-                >"$TMP/alerts.jsonl" || die 2 "label filter failed"
+            # Step 1 — detect open starvation alerts. bead list has no --label
+            # flag, so filter the JSON locally (protocol step 1). Select on the
+            # `starvation-alert` label OR on a title that STARTS WITH "Starvation
+            # alert:" — the emitter's labelling is one of the defects under
+            # repair (facedete-1002c031 item 3), but the title is invariant.
+            # The title match is an anchored prefix, not a substring: the
+            # unravel-proposal siblings are titled "[Unravel] Starvation alert:
+            # ..." and are work-tracking beads this triage must never close.
+            # (The test goes INSIDE select(): `select(a) or b` evaluates to a
+            # bare boolean in jq, not to the selected objects.)
+            jq -c 'select(
+                       any(.labels[]?; . == "starvation-alert")
+                       or (.title // "" | test("^Starvation alert:"))
+                   )' "$TMP/open.jsonl" \
+                >"$TMP/alerts.jsonl" || die 2 "alert filter failed"
             local n id status
             n=$(jq -s 'length' "$TMP/alerts.jsonl")
             log "step 1: $n open starvation-alert bead(s)"
@@ -570,7 +602,7 @@ main() {
                 # snapshot (steps 2–4, probe included). Fall through to the
                 # shared emit/append tail — no early exit here.
                 run_probe || RC_ERROR=1
-                RUNLOG="- **$(date -u +%Y-%m-%d)** (\`scripts/triage-starvation-alerts.sh\`): step 1 found **0 open \`starvation-alert\` beads**. "
+                RUNLOG="- **$(date -u +%Y-%m-%d)** (\`scripts/triage-starvation-alerts.sh\`): step 1 found **0 open starvation-alert beads** (matched by label \`starvation-alert\` or title prefix \`Starvation alert:\`). "
                 RUNLOG+="Live store: $OPEN_COUNT open beads, ready frontier $READY_COUNT candidate(s) ($(jq -sr '[.[].id][0:4] | join(", ")' "$TMP/ready.jsonl")), "
                 RUNLOG+="$DOCTOR_SUMMARY, $DIAG_SUMMARY, probe ${PROBE_ID:-} $PROBE_STATUS. "
                 RUNLOG+="Verdict: starvation condition absent; nothing to verify-then-close, nothing to remediate."
@@ -633,4 +665,6 @@ main() {
     exit 0
 }
 
-main
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    main
+fi
