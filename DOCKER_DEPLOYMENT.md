@@ -243,7 +243,7 @@ curl http://localhost:8080/health
 ```
 
 ### Metrics
-- **Application metrics**: Available at `/metrics`
+- **Application metrics**: Not exposed; `/metrics` returns a JSON `404` because the application does not collect server-side metrics
 - **Nginx metrics**: Access logs and error logs
 - **Container metrics**: CPU, memory, network usage
 

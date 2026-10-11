@@ -98,3 +98,20 @@ describe('production nginx API responses', () => {
     });
   }
 });
+
+test('reverse-proxy configuration preserves the health contract and rejects metrics', () => {
+  const config = fs.readFileSync(path.join(appRoot, 'nginx-proxy.conf'), 'utf8');
+  const healthLocation = nginxLocations(config, 'health');
+  const metricsLocation = nginxLocations(config, 'metrics');
+
+  expect(healthLocation).toHaveLength(1);
+  expect(healthLocation[0]).toMatch(/proxy_pass http:\/\/face_detection_prefixed\/health;/);
+
+  expect(metricsLocation).toHaveLength(1);
+  expect(metricsLocation[0]).toMatch(/default_type application\/json;/);
+  expect(metricsLocation[0]).toMatch(/add_header Cache-Control "no-store" always;/);
+  expect(nginxReturn(metricsLocation[0])).toEqual({
+    status: 404,
+    body: '{"error":"not_found","path":"/metrics"}'
+  });
+});

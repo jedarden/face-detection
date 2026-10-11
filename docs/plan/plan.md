@@ -11,9 +11,10 @@ learning approaches) that predates this doc.
 - **`docker-app/`** — the production artifact. A client-side, browser-only face
   detection demo (face-api.js / TensorFlow.js on top of webcam video) packaged
   as a multi-stage Docker image and served by nginx. All inference runs in the
-  visitor's browser; the container is a static file server plus a couple of
-  JSON status endpoints (`/health`, `/metrics`). Two modes: Lite (bounding
-  boxes only) and Pro (68-point landmarks, expression, age/gender).
+  visitor's browser; the container is a static file server with a JSON liveness
+  endpoint at `/health`. `/metrics` is intentionally unsupported and returns a
+  JSON `404` because there is no server-side metrics collection. Two modes: Lite
+  (bounding boxes only) and Pro (68-point landmarks, expression, age/gender).
 - **`research/face-detection-lite/`**, **`research/face-detection-pro/`** —
   research notes and standalone browser demos (`python3 -m http.server`), not
   deployed.
