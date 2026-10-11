@@ -115,18 +115,19 @@ http {
         }
 
         # Health check endpoint
-        location /health {
+        location = /health {
             access_log off;
             default_type application/json;
             add_header Cache-Control "no-store" always;
-            return 200 '{"status":"healthy","version":"1.0.0","timestamp":"$time_iso8601","services":{"nginx":"running","face-detection":"available"},"features":{"lite_mode":true,"pro_mode":true,"tensorflow_js":true,"face_api_js":true}}';
+            return 200 '{"status":"healthy","timestamp":"$time_iso8601"}';
         }
 
-        # Performance metrics endpoint
-        location /metrics {
+        # Metrics are not collected by this application; keep the endpoint explicit
+        location = /metrics {
             access_log off;
-            return 200 "nginx_up 1\nnginx_requests_total $request_completion\nnginx_connections_active $connections_active\n";
-            add_header Content-Type text/plain;
+            default_type application/json;
+            add_header Cache-Control "no-store" always;
+            return 404 '{"error":"not_found","path":"/metrics"}';
         }
 
         # Deny access to hidden files

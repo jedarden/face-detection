@@ -183,6 +183,22 @@ The nginx.conf includes:
 - SPA fallback routing
 - Health check endpoint at `/health`
 
+### HTTP API
+
+`GET /health` returns status `200` with `Content-Type: application/json`, `Cache-Control: no-store`, and this response schema:
+
+```json
+{"status":"healthy","timestamp":"<ISO 8601 timestamp>"}
+```
+
+The endpoint reports web-server liveness. It does not indicate browser camera access or face-model readiness. The nginx Dockerfile healthcheck also requires both HTTP and HTTPS health URLs to succeed and the built `index.html` to exist. The Compose simple image checks its HTTP `/health` response.
+
+`GET /metrics` is unsupported because the server does not collect metrics. It returns status `404`, `Content-Type: application/json`, and `Cache-Control: no-store`:
+
+```json
+{"error":"not_found","path":"/metrics"}
+```
+
 ### 📦 Webpack Configuration
 
 - **Common**: Shared configuration for both dev and production

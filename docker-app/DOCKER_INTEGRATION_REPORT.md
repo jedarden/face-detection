@@ -33,8 +33,8 @@ Created comprehensive scripts in the `scripts/` directory:
 - **Support for multiple environments** (dev, staging, production)
 
 ### 5. Monitoring & Health Checks ✅
-- **Health endpoint** at `/health` returning OK status
-- **Metrics endpoint** at `/metrics` with nginx statistics
+- **Health endpoint** at `/health` returns a no-cache JSON `200` liveness response
+- `/metrics` is unsupported and returns a JSON `404`; nginx statistics are not exposed
 - **Monitoring dashboard** at `/monitoring.html` with real-time metrics
 - **Container health checks** running every 30 seconds
 
@@ -61,8 +61,8 @@ docker run -d --name face-detection-test -p 8080:8080 face-detection-app:simple
 
 # Verified endpoints:
 - http://localhost:8080/ - Main application
-- http://localhost:8080/health - Health check (returns "OK")
-- http://localhost:8080/metrics - Performance metrics
+- http://localhost:8080/health - JSON liveness response (`200`)
+- http://localhost:8080/metrics - JSON not-found response (`404`)
 - http://localhost:8080/monitoring.html - Monitoring dashboard
 ```
 
@@ -167,7 +167,7 @@ docker build --no-cache -t face-detection-app:latest .
 
 ### Performance Issues
 1. Check resource limits in docker-compose.yml
-2. Monitor with `/metrics` endpoint
+2. Use the in-app diagnostics for browser performance; no server-side `/metrics` endpoint is provided
 3. Review nginx access logs in container
 
 ## Conclusion

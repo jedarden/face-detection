@@ -47,6 +47,12 @@ Other things in the app:
 - Test suite: Jest unit and integration tests, Puppeteer E2E tests, Playwright specs, and a security test file under `docker-app/tests/`
 - Multi-stage Dockerfile (Node builder stage, `nginx:alpine` runtime); the 2.0.5 image is about 80 MB compressed on GHCR
 - Docker `HEALTHCHECK` plus an nginx `/health` endpoint
+
+#### HTTP API
+
+- `GET /health` returns `200 application/json` with `{"status":"healthy","timestamp":"<ISO 8601>"}` and `Cache-Control: no-store`. This is a web-server liveness check; it does not report browser camera or model readiness.
+- `GET /metrics` is unsupported and returns `404 application/json` with `{"error":"not_found","path":"/metrics"}`. The application does not collect server-side metrics.
+- The nginx Dockerfile healthcheck requires successful HTTP and HTTPS `/health` responses and the built `index.html`. The Compose simple image checks its HTTP `/health` response.
 - HTTPS on port 8443 with a self-signed certificate generated at build time; mount your own certificates at `/etc/nginx/ssl` (see `docker-compose.yml`)
 
 ## Quick start

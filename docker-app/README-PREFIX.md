@@ -123,7 +123,7 @@ server {
 - Leading slash is optional - it will be added automatically if missing
 - Trailing slash is not needed and will be handled automatically
 - Health check endpoint (`/health`) always works without prefix
-- Metrics endpoint (`/metrics`) always works without prefix
+- Server-side metrics are not collected; `/metrics` returns JSON `404` with or without a prefix
 
 ## Technical Details
 

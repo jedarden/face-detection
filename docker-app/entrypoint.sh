@@ -86,10 +86,6 @@ else
     APP_STATUS=\$?
 fi
 
-# Check if nginx process is running
-NGINX_PID=\$(pgrep nginx)
-NGINX_STATUS=\$?
-
 # Check if the main index.html exists
 if [ -f /usr/share/nginx/html/index.html ]; then
     FILE_STATUS=0
@@ -98,7 +94,7 @@ else
 fi
 
 # Overall health status
-if [ \$HTTP_STATUS -eq 0 ] && [ \$NGINX_STATUS -eq 0 ] && [ \$FILE_STATUS -eq 0 ] && [ \$APP_STATUS -eq 0 ]; then
+if [ \$HTTP_STATUS -eq 0 ] && [ \$HTTPS_STATUS -eq 0 ] && [ \$FILE_STATUS -eq 0 ] && [ \$APP_STATUS -eq 0 ]; then
     echo "Health check passed"
     exit 0
 else
@@ -106,7 +102,6 @@ else
     [ \$HTTP_STATUS -ne 0 ] && echo "  - HTTP endpoint not responding"
     [ \$HTTPS_STATUS -ne 0 ] && echo "  - HTTPS endpoint not responding"
     [ \$APP_STATUS -ne 0 ] && echo "  - Application endpoint not responding"
-    [ \$NGINX_STATUS -ne 0 ] && echo "  - Nginx process not running"
     [ \$FILE_STATUS -ne 0 ] && echo "  - Application files missing"
     exit 1
 fi

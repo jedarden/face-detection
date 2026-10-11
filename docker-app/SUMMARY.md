@@ -97,7 +97,7 @@ npm run test:e2e      # E2E tests
 
 - `/` - Main application
 - `/health` - Health check endpoint
-- `/metrics` - Performance metrics
+- `/metrics` - Unsupported; returns JSON `404`
 - `/monitoring.html` - Real-time monitoring dashboard
 
 ## Performance Characteristics

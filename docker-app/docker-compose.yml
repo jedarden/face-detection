@@ -16,7 +16,6 @@ services:
       - NODE_ENV=production
       - APP_VERSION=${APP_VERSION:-1.0.0}
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      - ENABLE_METRICS=${ENABLE_METRICS:-true}
       - MODEL_CACHE_DIR=/usr/share/nginx/html/model-cache
       - MAX_UPLOAD_SIZE=${MAX_UPLOAD_SIZE:-20M}
     volumes:
@@ -28,7 +27,7 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "/usr/local/bin/health-check"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 5s
       retries: 3
