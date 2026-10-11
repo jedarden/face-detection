@@ -24,9 +24,12 @@ learning approaches) that predates this doc.
   HTTP 200, fronted by Cloudflare).
 - Runs on `ardenone-cluster`, namespace `face-detection`, single pod
   `face-detection-*`, image `ghcr.io/jedarden/face-detection:2.0.5`.
-- Deployment manifest lives in `jedarden/declarative-config`, synced by
-  ArgoCD — this repo does not deploy itself. The manifest must use an
-  immutable semver release tag or a content digest; `latest` is not valid.
+- Deployment manifest lives at
+  `k8s/ardenone-cluster/face-detection/face-detection-deployment.yml` in
+  `jedarden/declarative-config`, synced by the `face-detection` ArgoCD
+  Application on `ardenone-cluster` — this repo does not deploy itself. The
+  manifest must use an immutable semver release tag or a content digest;
+  `latest` is not valid.
 - `scripts/verify-deployment-image.sh` checks this plan or a supplied manifest
   and rejects mutable `latest` image references.
 - CI/CD migration off GitHub Actions onto Argo Workflows (`iad-ci`) is
