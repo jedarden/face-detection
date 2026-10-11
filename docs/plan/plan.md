@@ -23,9 +23,12 @@ learning approaches) that predates this doc.
 - Public URL: **https://face.jedarden.com** (confirmed reachable 2026-07-20,
   HTTP 200, fronted by Cloudflare).
 - Runs on `ardenone-cluster`, namespace `face-detection`, single pod
-  `face-detection-*`, image `ghcr.io/jedarden/face-detection:latest`.
+  `face-detection-*`, image `ghcr.io/jedarden/face-detection:2.0.5`.
 - Deployment manifest lives in `jedarden/declarative-config`, synced by
-  ArgoCD — this repo does not deploy itself.
+  ArgoCD — this repo does not deploy itself. The manifest must use an
+  immutable semver release tag or a content digest; `latest` is not valid.
+- `scripts/verify-deployment-image.sh` checks this plan or a supplied manifest
+  and rejects mutable `latest` image references.
 - CI/CD migration off GitHub Actions onto Argo Workflows (`iad-ci`) is
   **already tracked** in this repo's own beads workspace (bf-2jh, bf-2py,
   bf-vh3, bf-25r) — not duplicated here. That migration is also *why* the
