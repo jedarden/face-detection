@@ -1,4 +1,4 @@
-import { FaceDetectionApp } from '../../src/index.js';
+import { FaceDetectionApp } from '../../src/index-wasm.js';
 import { setupMockDOM, waitForAsync, createMockNavigator } from '../test-utils/mockHelpers.js';
 
 describe('UI Components Tests', () => {
@@ -265,6 +265,172 @@ describe('UI Components Tests', () => {
       expect(document.getElementById('startBtn')).toBeTruthy();
       expect(document.getElementById('stopBtn')).toBeTruthy();
       expect(document.getElementById('stats')).toBeTruthy();
+    });
+  });
+
+  describe('Snapshot Feature', () => {
+    beforeEach(() => {
+      app.setupUI();
+      // Mock video and canvas elements with proper properties
+      const mockVideo = document.getElementById('video');
+      const mockCanvas = document.getElementById('overlay');
+
+      // Use Object.defineProperty to set read-only properties
+      Object.defineProperty(mockVideo, 'videoWidth', { value: 640, writable: true });
+      Object.defineProperty(mockVideo, 'videoHeight', { value: 480, writable: true });
+
+      app.video = mockVideo;
+      app.canvas = mockCanvas;
+    });
+
+    test('should have snapshot button in UI', () => {
+      const snapshotBtn = document.getElementById('snapshotBtn');
+      expect(snapshotBtn).toBeTruthy();
+      expect(snapshotBtn.textContent).toBe('Save Snapshot');
+      expect(snapshotBtn.className).toContain('btn-snapshot');
+    });
+
+    test('should attach event listener to snapshot button', () => {
+      const snapshotBtn = document.getElementById('snapshotBtn');
+      const saveSnapshotSpy = jest.spyOn(app, 'saveSnapshot');
+
+      snapshotBtn.click();
+      expect(saveSnapshotSpy).toHaveBeenCalled();
+    });
+
+    test('should create snapshot when video and canvas are available', () => {
+      // Mock canvas methods
+      const mockContext = {
+        save: jest.fn(),
+        restore: jest.fn(),
+        translate: jest.fn(),
+        scale: jest.fn(),
+        drawImage: jest.fn(),
+      };
+
+      const mockCanvas = {
+        width: 640,
+        height: 480,
+        getContext: jest.fn().mockReturnValue(mockContext),
+        toDataURL: jest.fn().mockReturnValue('data:image/png;base64,mockdata')
+      };
+
+      // Mock document.createElement for canvas
+      const originalCreateElement = document.createElement;
+      document.createElement = jest.fn()
+        .mockImplementation((tag) => {
+          if (tag === 'canvas') return mockCanvas;
+          return originalCreateElement.call(document, tag);
+        });
+
+      // Mock document.createElement for anchor
+      const mockLink = {
+        download: '',
+        href: '',
+        click: jest.fn(),
+      };
+      document.createElement.mockImplementation((tag) => {
+        if (tag === 'canvas') return mockCanvas;
+        if (tag === 'a') return mockLink;
+        return originalCreateElement.call(document, tag);
+      });
+
+      const saveSnapshotSpy = jest.spyOn(app, 'saveSnapshot');
+      app.saveSnapshot();
+
+      expect(saveSnapshotSpy).toHaveBeenCalled();
+      expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png');
+      expect(mockLink.download).toMatch(/face-detection-snapshot-.*\.png/);
+      expect(mockLink.href).toBe('data:image/png;base64,mockdata');
+      expect(mockLink.click).toHaveBeenCalled();
+
+      // Restore original
+      document.createElement = originalCreateElement;
+    });
+
+    test('should handle missing video or canvas gracefully', () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      app.video = null;
+      app.canvas = null;
+
+      expect(() => app.saveSnapshot()).not.toThrow();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Video or canvas not available for snapshot');
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    test('should mirror video and overlay in snapshot', () => {
+      const mockContext = {
+        save: jest.fn(),
+        restore: jest.fn(),
+        translate: jest.fn(),
+        scale: jest.fn(),
+        drawImage: jest.fn(),
+      };
+
+      const mockCanvas = {
+        width: 640,
+        height: 480,
+        getContext: jest.fn().mockReturnValue(mockContext),
+        toDataURL: jest.fn().mockReturnValue('data:image/png;base64,mockdata')
+      };
+
+      const mockLink = {
+        download: '',
+        href: '',
+        click: jest.fn(),
+      };
+
+      const originalCreateElement = document.createElement;
+      document.createElement = jest.fn()
+        .mockImplementation((tag) => {
+          if (tag === 'canvas') return mockCanvas;
+          if (tag === 'a') return mockLink;
+          return originalCreateElement.call(document, tag);
+        });
+
+      app.saveSnapshot();
+
+      // Verify mirroring was applied for both video and overlay
+      expect(mockContext.save).toHaveBeenCalledTimes(2);
+      expect(mockContext.translate).toHaveBeenCalledTimes(2);
+      expect(mockContext.scale).toHaveBeenCalledTimes(2);
+      expect(mockContext.scale).toHaveBeenCalledWith(-1, 1);
+      expect(mockContext.restore).toHaveBeenCalledTimes(2);
+
+      document.createElement = originalCreateElement;
+    });
+
+    test('should use timestamp in snapshot filename', () => {
+      const mockCanvas = {
+        width: 640,
+        height: 480,
+        getContext: jest.fn().mockReturnValue({}),
+        toDataURL: jest.fn().mockReturnValue('data:image/png;base64,mockdata')
+      };
+
+      const mockLink = {
+        download: '',
+        href: '',
+        click: jest.fn(),
+      };
+
+      const originalCreateElement = document.createElement;
+      document.createElement = jest.fn()
+        .mockImplementation((tag) => {
+          if (tag === 'canvas') return mockCanvas;
+          if (tag === 'a') return mockLink;
+          return originalCreateElement.call(document, tag);
+        });
+
+      app.saveSnapshot();
+
+      // Verify filename pattern includes timestamp
+      expect(mockLink.download).toMatch(/^face-detection-snapshot-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}/);
+      expect(mockLink.download).toMatch(/\.png$/);
+
+      document.createElement = originalCreateElement;
     });
   });
 });

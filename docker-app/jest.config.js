@@ -9,7 +9,7 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^face-api.js$': '<rootDir>/tests/__mocks__/face-api.js'
+    '^@vladmandic/face-api$': '<rootDir>/tests/__mocks__/face-api.js'
   },
   transform: {
     '^.+\\.js$': 'babel-jest'
