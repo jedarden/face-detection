@@ -18,3 +18,10 @@
 .beads/*.temp
 .beads/*.journal
 .br_recovery/
+
+# Generated test output and local verification extractions
+docker-app/coverage/
+docker-app/junit.xml
+docker-app/test-results/
+docker-app/public/models/manifest.json
+.needle-verify-facedete-*/

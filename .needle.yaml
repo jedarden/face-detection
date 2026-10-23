@@ -1,2 +1,8 @@
 bead_cli:
   backend: bead-rs
+
+gates:
+  - type: command
+    run_in: clean
+    commands:
+      - cd docker-app && npm ci --no-audit --no-fund && npm run build
