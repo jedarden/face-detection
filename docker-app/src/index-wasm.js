@@ -42,13 +42,16 @@ export class FaceDetectionApp {
   }
 
   async init() {
+    let stage = 'backend';
     try {
       // Initialize WASM backend first
       await this.initializeBackend();
       
       // Then proceed with normal initialization
+      stage = 'models';
       await this.loadModels();
       this.setupUI();
+      stage = 'camera';
       await this.setupCamera();
       
       // Additional initialization for lite mode
@@ -74,7 +77,12 @@ export class FaceDetectionApp {
       this.startDetection();
     } catch (error) {
       console.error('Failed to initialize app:', error);
-      this.showError('Failed to initialize the application. Please check your camera permissions.');
+      const messages = {
+        backend: 'Failed to initialize a processing backend. Please try a different browser.',
+        models: 'Failed to load face detection models. Please reload the page and try again.',
+        camera: 'Failed to initialize the application. Please check your camera permissions.'
+      };
+      this.showError(messages[stage]);
     }
   }
 
@@ -102,8 +110,6 @@ export class FaceDetectionApp {
         console.log('WASM backend initialized successfully');
       }
       
-      // Update UI with backend info
-      this.updateBackendDisplay();
     } else {
       this.backendType = this.config.preferredBackend;
       console.log('Using backend:', this.backendType);

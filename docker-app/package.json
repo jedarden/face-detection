@@ -16,7 +16,7 @@
     "lint": "eslint src/**/*.js",
     "migrate:wasm": "node migrate-to-wasm.js",
     "migrate:rollback": "node migrate-to-wasm.js --rollback",
-    "test:wasm": "jest tests/unit/wasmMigration.test.js",
+    "test:wasm": "npm run build && jest --runInBand --coverage=false tests/unit/wasmBackendContract.test.js tests/unit/wasmCompatibilityContract.test.js tests/unit/wasmEntryContract.test.js tests/integration/modelAssets.test.js",
     "benchmark:wasm": "node src/wasmBenchmark.js",
     "verify:wasm": "node verify-wasm.js"
   },

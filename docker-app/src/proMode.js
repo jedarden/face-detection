@@ -16,7 +16,6 @@ export class ProMode {
       landmarks: true,
       expressions: true,
       ageGender: true,
-      faceRecognition: true,
       contours: true,
       regions: true
     };
@@ -49,8 +48,7 @@ export class ProMode {
           faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
           faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL),
-          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
         ]);
 
         // Configure detection options for higher accuracy
