@@ -129,8 +129,6 @@ const dockerReady =
   const healthTls = (insecure) => curl(`https://127.0.0.1:${httpsPort}/health`, { insecure });
 
   beforeAll(async () => {
-    httpPort = await freePort();
-    httpsPort = await freePort();
     workspace = fs.mkdtempSync(path.join(process.cwd(), '.listener-smoke-'));
 
     // Mirror the image layout built by the Dockerfile: template and
@@ -151,25 +149,45 @@ const dockerReady =
       '-subj', '/C=US/ST=State/L=City/O=Organization/CN=localhost'
     ], { stdio: 'ignore' });
 
-    const runResult = run('docker', [
-      'run', '--rm', '-d', '--name', containerName,
-      '-p', `127.0.0.1:${httpPort}:8080`,
-      '-p', `127.0.0.1:${httpsPort}:8443`,
-      '-v', `${path.join(workspace, 'nginx.conf.template')}:/etc/nginx/nginx.conf.template:ro`,
-      '-v', `${confd}:/etc/nginx/conf.d:ro`,
-      '-v', `${path.join(workspace, 'entrypoint.sh')}:/usr/local/bin/entrypoint.sh:ro`,
-      '-v', `${path.join(appRoot, 'health-check')}:/usr/local/bin/health-check:ro`,
-      '-v', `${workspace}:/etc/nginx/ssl:ro`,
-      '-v', `${path.join(workspace, 'index.html')}:/usr/share/nginx/html/index.html:ro`,
-      '--health-cmd=/bin/sh /usr/local/bin/health-check',
-      '--health-interval=1s',
-      '--health-retries=2',
-      '--health-start-period=0s',
-      NGINX_IMAGE, '/usr/local/bin/entrypoint.sh'
-    ], { timeout: 30000 });
+    // The host Docker daemon is shared with other workers on this box, and a
+    // port that freePort() saw as free can still be held for a while by a
+    // just-removed container (or another worker's run) when docker tries to
+    // publish. Retry the whole publish on a fresh pair of ports; a
+    // deterministic failure (bad config) fails every attempt and surfaces
+    // with all daemon messages.
+    const runFailures = [];
+    let runResult;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      if (attempt > 1) {
+        run('docker', ['rm', '-f', containerName], { timeout: 15000 });
+      }
+      httpPort = await freePort();
+      httpsPort = await freePort();
+      runResult = run('docker', [
+        'run', '--rm', '-d', '--name', containerName,
+        '-p', `127.0.0.1:${httpPort}:8080`,
+        '-p', `127.0.0.1:${httpsPort}:8443`,
+        '-v', `${path.join(workspace, 'nginx.conf.template')}:/etc/nginx/nginx.conf.template:ro`,
+        '-v', `${confd}:/etc/nginx/conf.d:ro`,
+        '-v', `${path.join(workspace, 'entrypoint.sh')}:/usr/local/bin/entrypoint.sh:ro`,
+        '-v', `${path.join(appRoot, 'health-check')}:/usr/local/bin/health-check:ro`,
+        '-v', `${workspace}:/etc/nginx/ssl:ro`,
+        '-v', `${path.join(workspace, 'index.html')}:/usr/share/nginx/html/index.html:ro`,
+        '--health-cmd=/bin/sh /usr/local/bin/health-check',
+        '--health-interval=1s',
+        '--health-retries=2',
+        '--health-start-period=0s',
+        NGINX_IMAGE, '/usr/local/bin/entrypoint.sh'
+      ], { timeout: 30000 });
+      if (runResult.status === 0) {
+        runFailures.length = 0;
+        break;
+      }
+      runFailures.push(`attempt ${attempt} (ports ${httpPort}/${httpsPort}): ${(runResult.stderr || '').trim()}`);
+    }
 
-    if (runResult.status !== 0) {
-      throw new Error(`docker run failed: ${runResult.stderr}`);
+    if (!runResult || runResult.status !== 0) {
+      throw new Error(`docker run failed:\n${runFailures.join('\n')}`);
     }
 
     const deadline = Date.now() + 30000;
