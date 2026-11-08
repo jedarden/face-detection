@@ -5,4 +5,7 @@ gates:
   - type: command
     run_in: clean
     commands:
+      - bash scripts/tests/verify-deployment-image.test.sh
+      - bash scripts/verify-deployment-image.sh docs/plan/plan.md
+      - bash scripts/verify-deployment-image.sh docs/operations/production-release.md
       - cd docker-app && npm ci --no-audit --no-fund && npm run build

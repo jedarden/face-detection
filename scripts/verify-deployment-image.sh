@@ -9,7 +9,9 @@ if [[ ! -f "$INPUT" ]]; then
     exit 2
 fi
 
-references=$(grep -Eo 'ghcr\.io/jedarden/face-detection(:[^[:space:]`]+|@[[:alnum:]:.-]+)' "$INPUT" || true)
+# Include bare references: an untagged image silently follows the registry's
+# default tag and must fail even when another reference in the file is pinned.
+references=$(grep -Eo 'ghcr\.io/jedarden/face-detection[^[:space:]`",;)]*' "$INPUT" || true)
 
 if [[ -z "$references" ]]; then
     printf 'deployment image verification: no face-detection image reference found in %s\n' "$INPUT" >&2
@@ -18,6 +20,7 @@ fi
 
 while IFS= read -r reference; do
     [[ -n "$reference" ]] || continue
+    reference=${reference%\'}
 
     if [[ "$reference" == *":latest" ]]; then
         printf 'deployment image verification: mutable latest tag rejected: %s\n' "$reference" >&2

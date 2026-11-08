@@ -32,7 +32,10 @@ learning approaches) that predates this doc.
   manifest must use an immutable semver release tag or a content digest;
   `latest` is not valid.
 - `scripts/verify-deployment-image.sh` checks this plan or a supplied manifest
-  and rejects mutable `latest` image references.
+  and rejects mutable or untagged image references. The repository gate checks
+  the plan and the [production release runbook](../operations/production-release.md);
+  the runbook requires validating the GitOps manifest before each release or
+  rollback change.
 - CI/CD migration off GitHub Actions onto Argo Workflows (`iad-ci`) is
   **already tracked** in this repo's own beads workspace (bf-2jh, bf-2py,
   bf-vh3, bf-25r) — not duplicated here. That migration is also *why* the
