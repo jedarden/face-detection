@@ -55,6 +55,17 @@ Other things in the app:
 - The nginx Dockerfile healthcheck requires successful HTTP and HTTPS `/health` responses and the built `index.html`. The Compose simple image checks its HTTP `/health` response.
 - HTTPS on port 8443 with a self-signed certificate generated at build time; mount your own certificates at `/etc/nginx/ssl` (see `docker-compose.yml`)
 
+#### Verification
+
+`scripts/definition-of-done.sh` is the workspace's verification gate: it installs dependencies if they are missing, builds the production webpack bundle, and runs the HTTP API-contract and Docker-healthcheck integration suites.
+
+```bash
+scripts/definition-of-done.sh          # full gate
+scripts/definition-of-done.sh --fast   # same scope; NEEDLE fast lane
+```
+
+`npm test` runs the whole Jest suite, which currently carries known-red suites unrelated to the server contract (jsdom DOM and model-mock debt; see the header of the script for the inventory), so the script above is the supported definition of done.
+
 ## Quick start
 
 ### Research demo
