@@ -67,6 +67,26 @@ scripts/definition-of-done.sh --fast   # same scope; NEEDLE fast lane
 
 `npm test` runs the whole Jest suite, which currently carries known-red suites unrelated to the server contract (jsdom DOM and model-mock debt; see the header of the script for the inventory), so the script above is the supported definition of done.
 
+#### WASM compatibility contract
+
+The production browser entry tries the TensorFlow.js WASM backend first. A
+runtime is WASM-compatible when it provides the core `WebAssembly` API used by
+the backend (`WebAssembly.validate`) and can load the self-hosted `/wasm/`
+files and `/models/` assets from the application origin. SIMD is optional: it
+improves performance when the browser validates the SIMD module. Threads are
+also optional: they are enabled only when `SharedArrayBuffer` is available
+(normally an HTTPS or localhost, cross-origin-isolated context); otherwise
+WASM runs single-threaded.
+
+If WASM initialization fails, the app reports the original error and tries
+WebGL, then CPU if WebGL is unavailable. The selected backend is exposed in
+the UI, and `fallback: true` identifies either fallback. The model
+compatibility check treats each supported model independently: a model load or
+detection error marks that model incompatible, while a WASM backend setup
+error rejects the check before it reports model results. Run
+`cd docker-app && npm run test:wasm` to exercise the supported and
+incompatible-runtime contracts.
+
 ## Quick start
 
 ### Research demo

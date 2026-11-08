@@ -94,6 +94,24 @@ The application supports three backends:
 
 Users can switch backends via the UI dropdown or programmatically.
 
+### WASM compatibility contract
+
+WASM requires a browser `WebAssembly` implementation with
+`WebAssembly.validate`, plus access to the app's same-origin `/wasm/` binaries
+and `/models/` files. SIMD is optional and is used only when the browser
+validates the SIMD module. `SharedArrayBuffer` is also optional; when it is
+unavailable (for example, because the page is not in a secure,
+cross-origin-isolated context), the backend stays usable with one thread.
+
+Initialization is reported as `{ backend, fallback, error }`. A successful
+WASM start returns `backend: "wasm"` and `fallback: false`. An incompatible
+runtime or another WASM initialization error first falls back to WebGL, then
+to CPU if WebGL also fails; fallback results set `fallback: true` and retain
+the original WASM error. Model compatibility checks do not silently fallback:
+they reject on backend setup failure and return one boolean per model when a
+model load or detection fails. The supported check is covered by
+`npm run test:wasm`.
+
 ### WASM-Specific Settings
 ```javascript
 const app = new FaceDetectionApp({

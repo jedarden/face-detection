@@ -16,6 +16,18 @@ export function configureWASMPaths() {
 }
 
 /**
+ * Check the minimum runtime capability required by the WASM backend.
+ *
+ * SIMD and SharedArrayBuffer are optional optimizations. The backend cannot
+ * run at all without the core WebAssembly validation API, so that condition
+ * is checked before changing TensorFlow.js backends or configuring threads.
+ */
+export function isWASMRuntimeSupported() {
+  return typeof WebAssembly !== 'undefined'
+    && typeof WebAssembly.validate === 'function';
+}
+
+/**
  * Detect WASM features available in the browser
  */
 export async function detectWASMFeatures() {
@@ -107,6 +119,10 @@ export async function initializeWASMBackend() {
   try {
     // Log WebAssembly availability
     console.log('WebAssembly available:', typeof WebAssembly !== 'undefined');
+
+    if (!isWASMRuntimeSupported()) {
+      throw new Error('WebAssembly is not supported in this runtime');
+    }
     
     // Configure WASM paths
     console.log('Configuring WASM paths...');
@@ -295,6 +311,7 @@ export class BackendMonitor {
 
 export default {
   initializeWASMBackend,
+  isWASMRuntimeSupported,
   detectWASMFeatures,
   configureWASMThreads,
   getBackendPerformance,

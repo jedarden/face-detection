@@ -3,7 +3,8 @@ import { setWasmPaths, setThreadsCount } from '@tensorflow/tfjs-backend-wasm';
 import {
   configureWASMThreads,
   detectWASMFeatures,
-  initializeWASMBackend
+  initializeWASMBackend,
+  isWASMRuntimeSupported
 } from '../../src/wasmBackend.js';
 
 jest.mock('@tensorflow/tfjs', () => ({
@@ -55,10 +56,14 @@ afterEach(() => {
 });
 
 test('initializes self-hosted WASM, probes features, and disposes the test tensors', async () => {
-  setGlobal('WebAssembly', { validate: jest.fn().mockReturnValue(true) });
+  setGlobal('WebAssembly', {
+    validate: jest.fn().mockReturnValue(true),
+    instantiate: jest.fn()
+  });
   setGlobal('SharedArrayBuffer', class SharedArrayBuffer {});
   Object.defineProperty(navigator, 'hardwareConcurrency', { configurable: true, value: 8 });
 
+  expect(isWASMRuntimeSupported()).toBe(true);
   const result = await initializeWASMBackend();
 
   expect(result).toMatchObject({ backend: 'wasm', fallback: false, error: null });
@@ -71,14 +76,31 @@ test('initializes self-hosted WASM, probes features, and disposes the test tenso
   expect(tf.matMul.mock.results[0].value.dispose).toHaveBeenCalled();
 });
 
-test('reports an unsupported environment and uses single-threaded WASM', async () => {
+test('treats missing WebAssembly as incompatible while keeping single-threaded detection safe', async () => {
   setGlobal('WebAssembly', undefined);
   setGlobal('SharedArrayBuffer', undefined);
 
+  expect(isWASMRuntimeSupported()).toBe(false);
   expect(await detectWASMFeatures()).toMatchObject({
     simdSupport: false, threadsSupport: false, backendName: 'wasm'
   });
   expect(await configureWASMThreads()).toEqual({ threads: 1, multithreading: false });
+  expect(setThreadsCount).not.toHaveBeenCalled();
+});
+
+test('falls back to WebGL before configuring WASM in an incompatible runtime', async () => {
+  setGlobal('WebAssembly', undefined);
+
+  const result = await initializeWASMBackend();
+
+  expect(result).toMatchObject({
+    backend: 'webgl',
+    fallback: true,
+    error: 'WebAssembly is not supported in this runtime'
+  });
+  expect(tf.setBackend).toHaveBeenCalledWith('webgl');
+  expect(tf.setBackend).not.toHaveBeenCalledWith('wasm');
+  expect(setWasmPaths).not.toHaveBeenCalled();
   expect(setThreadsCount).not.toHaveBeenCalled();
 });
 
