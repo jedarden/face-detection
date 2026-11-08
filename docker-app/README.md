@@ -122,6 +122,7 @@ docker-app/
    npm test                # Unit tests
    npm run test:wasm       # WASM feature parity tests
    npm run test:e2e        # E2E tests
+   npm run test:playwright # Browser camera coverage (builds first)
    ```
 
 5. **🚀 Verify WASM is working:**
@@ -141,6 +142,7 @@ docker-app/
 - `npm test` - Run unit tests
 - `npm run test:wasm` - Test WASM feature parity
 - `npm run test:e2e` - Run end-to-end tests
+- `npm run test:playwright` - Run the browser camera-coverage suite (builds the bundle first, Chromium project)
 - `npm run test:coverage` - Generate test coverage report
 - `npm run verify:wasm` - Verify WASM configuration
 - `npm run benchmark:wasm` - Run WASM performance benchmarks
@@ -263,6 +265,35 @@ When multiple cameras are available on your device, a camera selector will autom
 2. Select your preferred camera from the dropdown menu
 3. The app will automatically switch to the selected camera
 4. Detection will continue seamlessly during camera switching
+
+Mechanically, switching opens the new device with an exact `deviceId` constraint
+(`getUserMedia({ video: { deviceId: { exact: ... } } })`) and stops every track
+of the previous stream, so the old camera is released before detection resumes
+on the new one. The selector lists each camera's browser-reported label, or
+`Camera N` when labels are withheld (labels are only populated after camera
+permission is granted).
+
+#### Camera fallback behavior
+
+These behaviors are pinned by `tests/playwright/camera-selection.spec.js`
+(`npm run test:playwright`):
+
+- **Permission denied at startup** (`NotAllowedError`): the app replaces its UI
+  with a controlled error panel reading "Please check your camera permissions.",
+  no video stream is opened, and detection never starts. Recovery is a page
+  reload after granting the camera permission in the browser.
+- **No camera available at startup** (`NotFoundError`): same controlled error
+  path and message as permission denial — the app cannot distinguish the two at
+  the startup stage and treats both as "camera unavailable".
+- **Only one camera detected**: the selector stays hidden; the app uses that
+  camera directly with its default facing-mode constraint.
+- **Mid-session switch failure** (e.g. the selected device disappears or rejects
+  the exact-ID constraint): the previous stream is stopped, the app shows
+  "Failed to switch camera. Please try again.", and the error panel replaces the
+  whole app UI — recovery is a page reload.
+- **Insecure context**: browsers grant `getUserMedia` only in secure contexts —
+  see [HTTP, HTTPS, and certificates](#http-https-and-certificates) for why
+  camera access requires `localhost` or an accepted-certificate HTTPS origin.
 
 ### 🎯 Detection Modes
 

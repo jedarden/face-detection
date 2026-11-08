@@ -5,8 +5,8 @@ const CAMERAS = [
   { deviceId: 'back-camera', label: 'Back Camera', groupId: 'back-group' },
 ];
 
-async function installCameraMock(page, { devices = CAMERAS, errorName = null } = {}) {
-  await page.addInitScript(({ devices: configuredDevices, errorName: configuredError }) => {
+async function installCameraMock(page, { devices = CAMERAS, errorName = null, failDeviceIds = [] } = {}) {
+  await page.addInitScript(({ devices: configuredDevices, errorName: configuredError, failDeviceIds: configuredFailDeviceIds }) => {
     const devices = configuredDevices.map(device => ({ ...device, kind: 'videoinput' }));
     const calls = [];
     const streams = [];
@@ -21,11 +21,15 @@ async function installCameraMock(page, { devices = CAMERAS, errorName = null } =
     function getUserMedia(constraints) {
       calls.push({ type: 'getUserMedia', constraints });
 
-      if (configuredError) {
+      const requestedDeviceId = constraints?.video?.deviceId?.exact;
+      if (configuredError && configuredFailDeviceIds.includes(requestedDeviceId)) {
         return Promise.reject(cameraError(configuredError));
       }
 
-      const requestedDeviceId = constraints?.video?.deviceId?.exact;
+      if (configuredError && configuredFailDeviceIds.length === 0) {
+        return Promise.reject(cameraError(configuredError));
+      }
+
       const device = devices.find(candidate => candidate.deviceId === requestedDeviceId) || devices[0];
 
       if (!device) {
@@ -104,7 +108,7 @@ async function installCameraMock(page, { devices = CAMERAS, errorName = null } =
         })),
       }),
     };
-  }, { devices, errorName });
+  }, { devices, errorName, failDeviceIds });
 }
 
 async function openApp(page, cameraOptions) {
@@ -199,5 +203,34 @@ test.describe('Camera device and permission handling', () => {
     expect(cleanup.streamActive).toBe(false);
     expect(cleanup.snapshot.streams.filter(stream => stream.stopCount > 0)).not.toHaveLength(0);
     expect(cleanup.snapshot.streams.every(stream => stream.readyState === 'ended')).toBe(true);
+  });
+
+  test('hides the camera selector when only one camera is available', async ({ page }) => {
+    await openApp(page, { devices: [CAMERAS[0]] });
+    await waitForCameraReady(page);
+
+    await expect(page.locator('#camera-selector')).toBeHidden();
+
+    const snapshot = await page.evaluate(() => window.__cameraMock.getSnapshot());
+    expect(snapshot.calls.some(call => call.constraints.video?.facingMode === 'user')).toBe(true);
+    expect(snapshot.calls.some(call => call.constraints.video?.deviceId?.exact)).toBe(false);
+  });
+
+  test('renders a controlled error and stops the old stream when a camera switch fails', async ({ page }) => {
+    await openApp(page, { devices: CAMERAS, failDeviceIds: ['back-camera'], errorName: 'NotReadableError' });
+    await waitForCameraReady(page);
+
+    await page.locator('#cameraSelect').selectOption('back-camera');
+
+    await expect(page.locator('#app .error')).toBeVisible();
+    await expect(page.locator('#app .error')).toContainText('Failed to switch camera');
+
+    const snapshot = await page.evaluate(() => window.__cameraMock.getSnapshot());
+    const oldFrontStream = snapshot.streams.find(stream => stream.deviceId === 'front-camera');
+
+    expect(oldFrontStream.stopCount).toBeGreaterThan(0);
+    expect(snapshot.streams.find(stream => stream.deviceId === 'back-camera' && stream.active)).toBeUndefined();
+    expect(await page.evaluate(() => window.app.currentCameraId)).toBe('front-camera');
+    await expect(page.locator('#cameraSelect')).toHaveCount(0);
   });
 });
