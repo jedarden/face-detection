@@ -51,6 +51,7 @@ echo "🧪 Running the API, model-asset, WASM, and listener-smoke contract suite
 exec node_modules/.bin/jest --runInBand --coverage=false \
   tests/integration/apiContract.test.js \
   tests/integration/dockerHealthcheck.test.js \
+  tests/integration/certificateReplacement.test.js \
   tests/integration/modelAssets.test.js \
   tests/integration/listenerContract.test.js \
   tests/unit/wasmBackendContract.test.js \

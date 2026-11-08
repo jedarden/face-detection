@@ -3,16 +3,32 @@ version: '3.8'
 services:
   # Face Detection App without prefix (default deployment)
   face-detection-default:
-    build: .
+    # Dockerfile is the nginx image: it generates a self-signed certificate
+    # during the build and listens on both HTTP and HTTPS.
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+      - "8443:8443"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health && curl -sfk https://localhost:8443/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     restart: unless-stopped
+
+  # Replacement-certificate example. Put selfsigned.crt and selfsigned.key
+  # in ./ssl first, then run:
+  #   docker compose --profile custom-cert up face-detection-custom-cert
+  # The mount replaces the generated pair, so both files are required.
+  face-detection-custom-cert:
+    profiles: ["custom-cert"]
+    extends:
+      service: face-detection-default
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
 
   # Face Detection App with custom prefix
   face-detection-prefixed:
