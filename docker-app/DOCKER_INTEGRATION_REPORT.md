@@ -42,7 +42,7 @@ Created comprehensive scripts in the `scripts/` directory:
 - **Self-signed certificates** generated during build
 - **HTTPS support** on port 8443
 - **Security headers** configured in nginx
-- **HTTP to HTTPS redirect** in production mode
+- **Plain HTTP on port 8080** — no automatic HTTPS redirect (adding one is a documented opt-in rebuild; see the "HTTP, HTTPS, and certificates" section in `README.md`)
 
 ## Verification Results
 
