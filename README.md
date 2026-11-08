@@ -53,6 +53,7 @@ Other things in the app:
 - `GET /health` returns `200 application/json` with `{"status":"healthy","timestamp":"<ISO 8601>"}` and `Cache-Control: no-store`. This is a web-server liveness check; it does not report browser camera or model readiness.
 - `GET /metrics` is unsupported and returns `404 application/json` with `{"error":"not_found","path":"/metrics"}`. The application does not collect server-side metrics.
 - The nginx Dockerfile healthcheck requires successful HTTP and HTTPS `/health` responses and the built `index.html`. The Compose simple image checks its HTTP `/health` response.
+- If the server is unreachable, `/health` has no JSON failure response; Docker marks the container unhealthy after failed checks. With `APP_PREFIX`, the nginx healthcheck also probes the prefixed app route. A healthy container still returns `404` from `/metrics`.
 - The nginx image (GHCR / `docker-app/Dockerfile`) serves the app on **both** `http://localhost:8080` and `https://localhost:8443`; port 8443 uses a self-signed certificate generated when the image is built. See [HTTP, HTTPS, and certificates](./docker-app/README.md#http-https-and-certificates) for port mappings, the certificate workflow, and replacement steps. The Compose service builds the simpler HTTP-only image instead (`docker-app/Dockerfile.simple`), so its `8443` port mapping has no listener behind it.
 
 #### Verification

@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const net = require('node:net');
-const os = require('node:os');
 const path = require('node:path');
 const { execFileSync, spawnSync } = require('node:child_process');
 
@@ -36,6 +35,13 @@ function curl(url, { insecure = false } = {}) {
 
 function curlBody(url, { insecure = false } = {}) {
   const args = ['-s'];
+  if (insecure) args.push('-k');
+  args.push(url);
+  return run('curl', args, { timeout: 10000 });
+}
+
+function curlHeaders(url, { insecure = false } = {}) {
+  const args = ['-s', '-D', '-', '-o', '/dev/null'];
   if (insecure) args.push('-k');
   args.push(url);
   return run('curl', args, { timeout: 10000 });
@@ -125,7 +131,7 @@ const dockerReady =
   beforeAll(async () => {
     httpPort = await freePort();
     httpsPort = await freePort();
-    workspace = fs.mkdtempSync(path.join(os.tmpdir(), 'listener-smoke-'));
+    workspace = fs.mkdtempSync(path.join(process.cwd(), '.listener-smoke-'));
 
     // Mirror the image layout built by the Dockerfile: template and
     // entrypoint at their image paths, nginx-ssl.conf as the only file in
@@ -152,8 +158,13 @@ const dockerReady =
       '-v', `${path.join(workspace, 'nginx.conf.template')}:/etc/nginx/nginx.conf.template:ro`,
       '-v', `${confd}:/etc/nginx/conf.d:ro`,
       '-v', `${path.join(workspace, 'entrypoint.sh')}:/usr/local/bin/entrypoint.sh:ro`,
+      '-v', `${path.join(appRoot, 'health-check')}:/usr/local/bin/health-check:ro`,
       '-v', `${workspace}:/etc/nginx/ssl:ro`,
       '-v', `${path.join(workspace, 'index.html')}:/usr/share/nginx/html/index.html:ro`,
+      '--health-cmd=/bin/sh /usr/local/bin/health-check',
+      '--health-interval=1s',
+      '--health-retries=2',
+      '--health-start-period=0s',
       NGINX_IMAGE, '/usr/local/bin/entrypoint.sh'
     ], { timeout: 30000 });
 
@@ -184,6 +195,8 @@ const dockerReady =
     expect(result.contentType).toMatch(/^application\/json/);
     const payload = JSON.parse(curlBody(`http://127.0.0.1:${httpPort}/health`).stdout);
     expect(payload).toEqual({ status: 'healthy', timestamp: expect.any(String) });
+    expect(Number.isNaN(Date.parse(payload.timestamp))).toBe(false);
+    expect(curlHeaders(`http://127.0.0.1:${httpPort}/health`).stdout).toMatch(/cache-control: no-store/i);
   });
 
   test('HTTPS 8443 serves the health contract over TLS', () => {
@@ -193,6 +206,8 @@ const dockerReady =
     expect(result.contentType).toMatch(/^application\/json/);
     const payload = JSON.parse(curlBody(`https://127.0.0.1:${httpsPort}/health`, { insecure: true }).stdout);
     expect(payload).toEqual({ status: 'healthy', timestamp: expect.any(String) });
+    expect(Number.isNaN(Date.parse(payload.timestamp))).toBe(false);
+    expect(curlHeaders(`https://127.0.0.1:${httpsPort}/health`, { insecure: true }).stdout).toMatch(/cache-control: no-store/i);
   });
 
   test('8443 presents the image self-signed certificate, so untrusting clients fail', () => {
@@ -222,7 +237,31 @@ const dockerReady =
       const metrics = curl(url, { insecure: true });
       expect(metrics.status).toBe(404);
       expect(metrics.contentType).toMatch(/^application\/json/);
+      expect(JSON.parse(curlBody(url, { insecure: true }).stdout)).toEqual({ error: 'not_found', path: '/metrics' });
+      expect(curlHeaders(url, { insecure: true }).stdout).toMatch(/cache-control: no-store/i);
     }
+  });
+
+  test('the shipped Docker healthcheck succeeds in the container and rejects failed dependencies', async () => {
+    const check = (variable) => run('docker', [
+      'exec', ...(variable ? ['-e', variable] : []), containerName,
+      '/bin/sh', '/usr/local/bin/health-check'
+    ], { timeout: 10000 });
+
+    expect(check().status).toBe(0);
+    expect(check('HEALTHCHECK_HTTP_URL=http://localhost:8080/metrics').status).toBe(1);
+    expect(check('HEALTHCHECK_HTTPS_URL=https://localhost:8443/metrics').status).toBe(1);
+    expect(check('HEALTHCHECK_INDEX_FILE=/missing.html').status).toBe(1);
+
+    const deadline = Date.now() + 10000;
+    let health;
+    do {
+      health = run('docker', ['inspect', '--format', '{{.State.Health.Status}}', containerName]);
+      if (health.stdout.trim() === 'healthy') break;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    } while (Date.now() < deadline);
+    expect(health.status).toBe(0);
+    expect(health.stdout.trim()).toBe('healthy');
   });
 
   test('nginx starts without conflicting-server warnings', () => {

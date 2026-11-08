@@ -5,14 +5,14 @@ const { spawnSync } = require('node:child_process');
 const appRoot = path.resolve(__dirname, '../..');
 const healthCheck = path.join(appRoot, 'health-check');
 
-function runHealthcheck({ httpStatus = 0, httpsStatus = 0, indexExists = true } = {}) {
+function runHealthcheck({ httpStatus = 0, httpsStatus = 0, appStatus = 0, indexExists = true, prefix = '' } = {}) {
   const tempRoot = fs.mkdtempSync(path.join(process.cwd(), '.healthcheck-test-'));
   const binDir = path.join(tempRoot, 'bin');
   const indexFile = path.join(tempRoot, 'index.html');
   const curlLog = path.join(tempRoot, 'curl.log');
   fs.mkdirSync(binDir);
 
-  fs.writeFileSync(path.join(binDir, 'curl'), `#!/bin/sh\nprintf '%s\\n' "$*" >> "$CURL_LOG"\ncase "$*" in\n  *https://*) exit ${httpsStatus} ;;\n  *) exit ${httpStatus} ;;\nesac\n`);
+  fs.writeFileSync(path.join(binDir, 'curl'), `#!/bin/sh\nprintf '%s\\n' "$*" >> "$CURL_LOG"\ncase "$*" in\n  *https://*) exit ${httpsStatus} ;;\n  */camera/*) exit ${appStatus} ;;\n  *) exit ${httpStatus} ;;\nesac\n`);
   fs.chmodSync(path.join(binDir, 'curl'), 0o755);
   if (indexExists) fs.writeFileSync(indexFile, '<html></html>');
 
@@ -25,6 +25,7 @@ function runHealthcheck({ httpStatus = 0, httpsStatus = 0, indexExists = true } 
         HEALTHCHECK_HTTP_URL: 'http://health.test/health',
         HEALTHCHECK_HTTPS_URL: 'https://health.test/health',
         HEALTHCHECK_INDEX_FILE: indexFile,
+        APP_PREFIX: prefix,
         CURL_LOG: curlLog
       }
     });
@@ -39,11 +40,13 @@ describe('Docker healthcheck contract', () => {
   test('the nginx image invokes its script and Compose checks the simple image /health route', () => {
     const dockerfile = fs.readFileSync(path.join(appRoot, 'Dockerfile'), 'utf8');
     const compose = fs.readFileSync(path.join(appRoot, 'docker-compose.yml'), 'utf8');
+    const entrypoint = fs.readFileSync(path.join(appRoot, 'entrypoint.sh'), 'utf8');
 
     expect(dockerfile).toMatch(/COPY health-check \/usr\/local\/bin\/health-check/);
     expect(dockerfile).toMatch(/CMD \/usr\/local\/bin\/health-check \|\| exit 1/);
     expect(compose).toMatch(/dockerfile:\s*Dockerfile\.simple/);
     expect(compose).toMatch(/test:\s*\["CMD",\s*"curl",\s*"-f",\s*"http:\/\/localhost:8080\/health"\]/);
+    expect(entrypoint).not.toMatch(/cat > \/usr\/local\/bin\/health-check/);
   });
 
   test('the simple Docker image uses the shared server and checks its /health response', () => {
@@ -69,6 +72,25 @@ describe('Docker healthcheck contract', () => {
     [{ httpsStatus: 22 }, 'HTTPS endpoint not responding'],
     [{ indexExists: false }, 'Application files missing']
   ])('fails and identifies an unhealthy dependency (%o)', (options, expectedMessage) => {
+    const result = runHealthcheck(options);
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain(expectedMessage);
+  });
+
+  test('a prefixed deployment checks the app route as well as both health listeners', () => {
+    const result = runHealthcheck({ prefix: '/camera' });
+    expect(result.status).toBe(0);
+    expect(result.curlCalls).toEqual([
+      '-sf http://health.test/health',
+      '-sfk https://health.test/health',
+      '-sf http://localhost:8080/camera/'
+    ]);
+  });
+
+  test.each([
+    [{ prefix: '/camera', httpsStatus: 22 }, 'HTTPS endpoint not responding'],
+    [{ prefix: '/camera', appStatus: 22 }, 'Application endpoint not responding']
+  ])('a prefixed deployment fails when a dependency fails (%o)', (options, expectedMessage) => {
     const result = runHealthcheck(options);
     expect(result.status).toBe(1);
     expect(result.stdout).toContain(expectedMessage);

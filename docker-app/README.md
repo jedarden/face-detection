@@ -195,11 +195,15 @@ The nginx.conf includes:
 
 The endpoint reports web-server liveness. It does not indicate browser camera access or face-model readiness. The nginx Dockerfile healthcheck also requires both HTTP and HTTPS health URLs to succeed and the built `index.html` to exist. The Compose simple image checks its HTTP `/health` response.
 
+If the web server is unavailable, the client gets a connection or transport error; `/health` has no JSON failure body or `503` response. Docker reports the nginx container unhealthy after its configured retries when either health URL fails, `index.html` is missing, or (when `APP_PREFIX` is set) the prefixed app route fails. These checks use the `/health` status; a browser-side camera or model failure does not make the container unhealthy.
+
 `GET /metrics` is unsupported because the server does not collect metrics. It returns status `404`, `Content-Type: application/json`, and `Cache-Control: no-store`:
 
 ```json
 {"error":"not_found","path":"/metrics"}
 ```
+
+This `404` is the expected response even while the container is healthy. Monitoring clients must treat it as an unavailable API, not as a container health signal.
 
 ### HTTP, HTTPS, and certificates
 
