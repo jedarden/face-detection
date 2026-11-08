@@ -53,7 +53,7 @@ Other things in the app:
 - `GET /health` returns `200 application/json` with `{"status":"healthy","timestamp":"<ISO 8601>"}` and `Cache-Control: no-store`. This is a web-server liveness check; it does not report browser camera or model readiness.
 - `GET /metrics` is unsupported and returns `404 application/json` with `{"error":"not_found","path":"/metrics"}`. The application does not collect server-side metrics.
 - The nginx Dockerfile healthcheck requires successful HTTP and HTTPS `/health` responses and the built `index.html`. The Compose simple image checks its HTTP `/health` response.
-- HTTPS on port 8443 with a self-signed certificate generated at build time; mount your own certificates at `/etc/nginx/ssl` (see `docker-compose.yml`)
+- The nginx image (GHCR / `docker-app/Dockerfile`) serves the app on **both** `http://localhost:8080` and `https://localhost:8443`; port 8443 uses a self-signed certificate generated when the image is built. See [HTTP, HTTPS, and certificates](./docker-app/README.md#http-https-and-certificates) for port mappings, the certificate workflow, and replacement steps. The Compose service builds the simpler HTTP-only image instead (`docker-app/Dockerfile.simple`), so its `8443` port mapping has no listener behind it.
 
 #### Verification
 
@@ -82,9 +82,10 @@ python3 -m http.server 8000
 # Pull a specific version (tags are unprefixed semver)
 docker pull ghcr.io/jedarden/face-detection:2.0.5
 
-# Run container
-docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:2.0.5
-# Open http://localhost:8080
+# Run container with both listeners (HTTP 8080, HTTPS 8443)
+docker run -d -p 8080:8080 -p 8443:8443 ghcr.io/jedarden/face-detection:2.0.5
+# Open http://localhost:8080 (or https://localhost:8443 — the HTTPS
+# certificate is self-signed, so the browser shows a one-time warning)
 ```
 
 #### From source
@@ -92,6 +93,8 @@ docker run -d -p 8080:8080 ghcr.io/jedarden/face-detection:2.0.5
 cd docker-app
 docker-compose up
 # Open http://localhost:8080
+# Note: Compose builds the HTTP-only simple image; use the GHCR image (or
+# docker-app/Dockerfile) if you need the HTTPS listener on 8443.
 ```
 
 ### Development mode

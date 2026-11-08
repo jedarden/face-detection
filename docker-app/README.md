@@ -76,7 +76,7 @@ docker-app/
    ```bash
    docker-compose up face-detection-app
    ```
-   The app will be available at http://localhost:8080
+   The app will be available at http://localhost:8080. Compose builds the HTTP-only simple image — its `8443` port mapping has no listener behind it; see [HTTP, HTTPS, and certificates](#http-https-and-certificates).
 
 2. **🔧 Run in development mode:**
    ```bash
@@ -93,8 +93,10 @@ docker-app/
 
 2. **🚀 Run the container:**
    ```bash
-   docker run -p 8080:8080 face-detection-app
+   docker run -p 8080:8080 -p 8443:8443 face-detection-app
    ```
+
+   The app is served at http://localhost:8080 and https://localhost:8443. The HTTPS certificate is self-signed (generated when the image builds), so the browser shows a one-time trust warning — see [HTTP, HTTPS, and certificates](#http-https-and-certificates).
 
 ## 👨‍💻 Development
 
@@ -197,6 +199,48 @@ The endpoint reports web-server liveness. It does not indicate browser camera ac
 
 ```json
 {"error":"not_found","path":"/metrics"}
+```
+
+### HTTP, HTTPS, and certificates
+
+Both serving paths exist in this directory and they do not behave the same way:
+
+| Serving path | Image | Listeners | TLS |
+|---|---|---|---|
+| GHCR image / `docker build` (`Dockerfile`) | nginx | `8080` HTTP + `8443` HTTPS | Self-signed cert generated at image build |
+| `docker-compose up` (`Dockerfile.simple`) | node + Express (`server.js`) | `8080` HTTP only | none |
+
+Port mappings and URLs for the nginx image:
+
+- `8080` → `http://localhost:8080` — serves the app, `/health`, and `/metrics` in plain HTTP (defined by the server block in `nginx.conf.template`).
+- `8443` → `https://localhost:8443` — same app and endpoints over TLS (defined by `nginx-ssl.conf`, which the Dockerfile copies to `/etc/nginx/conf.d/ssl.conf` and the entrypoint-rendered `nginx.conf` loads through `include /etc/nginx/conf.d/*.conf`).
+- `docker run -d -p 8080:8080 -p 8443:8443 ghcr.io/jedarden/face-detection:2.0.5` exposes both; mapping only `8080` is fine for localhost use.
+
+`docker-compose.yml` maps `HTTP_PORT` (default `8080`) and `HTTPS_PORT` (default `8443`) for its production service, but that service builds `Dockerfile.simple`, which runs `server.js` under node and never opens a TLS listener — the `8443` mapping has nothing behind it and the `./ssl` volume mount is inert there. TLS exists only in the nginx image.
+
+**Why the HTTPS listener exists:** the browser only grants `getUserMedia` camera access in a secure context. `http://localhost` and `http://127.0.0.1` count as secure, so opening `http://localhost:8080` works. Opening the app from another device via a plain-HTTP LAN address (e.g. `http://192.168.1.10:8080`) is not a secure context and the camera stays blocked; `https://192.168.1.10:8443` after accepting the certificate warning is secure and the camera works.
+
+**Certificate workflow (nginx image):**
+
+1. The Dockerfile generates a self-signed pair at **image build time**: RSA 2048, 365 days, `CN=localhost`, written to `/etc/nginx/ssl/selfsigned.crt` and `/etc/nginx/ssl/selfsigned.key`. The build date of the image you pulled is the certificate's birthday — a long-lived image eventually serves an expired certificate, and browsers reject expired certificates outright (no click-through).
+2. On first visit to `https://localhost:8443` the browser shows an untrusted-certificate warning because the CA is the image itself. Accepting it is what makes the camera available on non-localhost origins. For command-line checks use `curl -k https://localhost:8443/health` (`-k` skips the trust check; without it curl refuses the certificate).
+3. To replace the self-signed pair with your own, mount it over `/etc/nginx/ssl`. The files must be named `selfsigned.crt` and `selfsigned.key` — those exact paths are hardcoded in `nginx-ssl.conf` (`ssl_certificate` / `ssl_certificate_key`). Generate a matching pair with:
+
+   ```bash
+   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+     -keyout ssl/selfsigned.key -out ssl/selfsigned.crt \
+     -subj "/CN=your.hostname.example"
+   ```
+
+   Then either run the image directly with `-v "$(pwd)/ssl:/etc/nginx/ssl:ro"`, or note that `docker-compose.yml` already mounts `./ssl` there — but as described above, the service Compose builds ignores that path, so certificate replacement through Compose requires overriding the production service to build `Dockerfile` instead of `Dockerfile.simple`. A mounted directory **replaces** the image's built-in pair, so the directory must actually contain both files or nginx fails to start with a missing-certificate error.
+4. For a real deployment, prefer a publicly trusted certificate: terminate TLS in front of the container (Cloudflare, Traefik, nginx) or place a real pair (e.g. from Let's Encrypt) into `./ssl` with the filenames above.
+
+**Optional HTTP→HTTPS redirect:** by design the nginx image serves plain HTTP on `8080` so the quick start needs no certificate click-through. To force HTTPS instead, replace the port-`8080` server block in `nginx.conf.template` with a redirect (`return 301 https://$host:8443$request_uri;`, keeping `/health` and `/metrics` reachable over HTTP for the container healthcheck) and rebuild the image.
+
+**Smoke test:** `tests/integration/listenerContract.test.js` pins this wiring (Dockerfile expose/certificate/conf.d lines, template include, TLS listener, healthcheck probing both URLs, Compose's HTTP-only reality) and, when Docker with a cached `nginx:alpine` image is available, starts a container from the real configs and asserts both listeners answer `/health` with the documented JSON, the TLS listener presents the self-signed certificate (untrusting clients fail), and nginx starts without conflicting-server warnings. Run it with:
+
+```bash
+cd docker-app && npx jest tests/integration/listenerContract.test.js
 ```
 
 ### 📦 Webpack Configuration

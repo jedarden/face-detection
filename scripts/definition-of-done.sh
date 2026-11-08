@@ -21,8 +21,11 @@
 #      the build runs fully cached with no network access)
 #   2. build the production webpack bundle -- the gate declared in
 #      .needle.yaml -- which compiles every webpack-reached source file
-#   3. run the HTTP API, Docker healthcheck, model availability, and WASM
-#      contract suites with coverage disabled so thresholds cannot fail a green run
+#   3. run the HTTP API, Docker healthcheck, model availability, WASM, and
+#      listener-smoke contract suites with coverage disabled so thresholds
+#      cannot fail a green run (the listener smoke additionally skips its
+#      live-container probes where Docker or a cached nginx:alpine image is
+#      unavailable)
 #
 # Usage:
 #   scripts/definition-of-done.sh          # full gate (default)
@@ -44,11 +47,12 @@ fi
 echo "🔨 Building the production bundle..."
 npm run build
 
-echo "🧪 Running the API, model-asset, and WASM contract suites..."
+echo "🧪 Running the API, model-asset, WASM, and listener-smoke contract suites..."
 exec node_modules/.bin/jest --runInBand --coverage=false \
   tests/integration/apiContract.test.js \
   tests/integration/dockerHealthcheck.test.js \
   tests/integration/modelAssets.test.js \
+  tests/integration/listenerContract.test.js \
   tests/unit/wasmBackendContract.test.js \
   tests/unit/wasmCompatibilityContract.test.js \
   tests/unit/wasmEntryContract.test.js

@@ -34,7 +34,9 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -out /etc/nginx/ssl/selfsigned.crt \
     -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
 
-# Copy nginx template and configurations
+# Copy nginx template and configurations; drop the base image's welcome-page
+# server so the entrypoint-rendered config's conf.d include loads only ssl.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf.template /etc/nginx/nginx.conf.template
 COPY nginx-ssl.conf /etc/nginx/conf.d/ssl.conf
 

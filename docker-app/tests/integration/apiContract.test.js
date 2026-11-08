@@ -67,7 +67,9 @@ describe('production nginx API responses', () => {
   const expectedCounts = {
     'nginx.conf': 1,
     'nginx.conf.template': 1,
-    'nginx-ssl.conf': 2
+    // HTTPS-only listener: plain HTTP on 8080 is served by the rendered
+    // nginx.conf; this file no longer carries a second (redirect) server.
+    'nginx-ssl.conf': 1
   };
 
   for (const [filename, expectedCount] of Object.entries(expectedCounts)) {

@@ -137,4 +137,10 @@ http {
             log_not_found off;
         }
     }
+
+    # Extra listeners ship as files in /etc/nginx/conf.d (the HTTPS server
+    # from conf.d/ssl.conf, built into the image by the Dockerfile). This
+    # include is what makes port 8443 actually listen; without it the SSL
+    # server block never loads.
+    include /etc/nginx/conf.d/*.conf;
 }
