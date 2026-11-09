@@ -5,7 +5,7 @@ set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 VERIFIER="$HERE/../verify-deployment-image.sh"
-FIXTURES=$(mktemp -d)
+FIXTURES=$(mktemp -d "$HERE/verify-deployment-image.XXXXXX")
 trap 'rm -rf "$FIXTURES"' EXIT
 
 cat > "$FIXTURES/pinned.yaml" <<'EOF'
@@ -17,13 +17,27 @@ bash "$VERIFIER" "$FIXTURES/pinned.yaml" >/dev/null
 printf "image: 'ghcr.io/jedarden/face-detection:2.0.5'\n" > "$FIXTURES/quoted.yaml"
 bash "$VERIFIER" "$FIXTURES/quoted.yaml" >/dev/null
 
-for tag in latest main 2 2.0 v2; do
+for tag in main 2 2.0 v2; do
     printf 'image: ghcr.io/jedarden/face-detection:%s\n' "$tag" > "$FIXTURES/invalid.yaml"
     if bash "$VERIFIER" "$FIXTURES/invalid.yaml" >/dev/null 2>&1; then
         printf 'FAIL: mutable image tag %s was accepted\n' "$tag" >&2
         exit 1
     fi
 done
+
+cat > "$FIXTURES/latest.yaml" <<'EOF'
+image: ghcr.io/jedarden/face-detection:2.0.5
+other: ghcr.io/jedarden/face-detection:latest
+EOF
+
+if output=$(bash "$VERIFIER" "$FIXTURES/latest.yaml" 2>&1); then
+    printf 'FAIL: latest tag beside a pinned image was accepted\n' >&2
+    exit 1
+fi
+if [[ "$output" != *'mutable latest tag rejected: ghcr.io/jedarden/face-detection:latest'* ]]; then
+    printf 'FAIL: latest tag failed for an unexpected reason: %s\n' "$output" >&2
+    exit 1
+fi
 
 printf "image: ghcr.io/jedarden/face-detection:2.0.'5\n" > "$FIXTURES/invalid.yaml"
 if bash "$VERIFIER" "$FIXTURES/invalid.yaml" >/dev/null 2>&1; then
