@@ -118,7 +118,8 @@ const dockerReady =
   run('openssl', ['version'], { timeout: 10000 }).status === 0;
 
 (dockerReady ? describe : describe.skip)('live listener smoke (requires Docker + a cached nginx:alpine image)', () => {
-  jest.setTimeout(60000);
+  // Budget for up to three publish-and-wait attempts (see beforeAll).
+  jest.setTimeout(120000);
 
   const containerName = `facedete-listener-smoke-${process.pid}-${Date.now()}`;
   let httpPort;
@@ -152,18 +153,19 @@ const dockerReady =
     // The host Docker daemon is shared with other workers on this box, and a
     // port that freePort() saw as free can still be held for a while by a
     // just-removed container (or another worker's run) when docker tries to
-    // publish. Retry the whole publish on a fresh pair of ports; a
-    // deterministic failure (bad config) fails every attempt and surfaces
-    // with all daemon messages.
+    // publish. Under churn the container can also start too slowly for the
+    // readiness deadline. Retry the whole publish-and-wait on a fresh pair
+    // of ports; a deterministic failure (bad config) fails every attempt
+    // and surfaces with all daemon messages.
     const runFailures = [];
-    let runResult;
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
+    let ready = false;
+    for (let attempt = 1; attempt <= 3 && !ready; attempt += 1) {
       if (attempt > 1) {
         run('docker', ['rm', '-f', containerName], { timeout: 15000 });
       }
       httpPort = await freePort();
       httpsPort = await freePort();
-      runResult = run('docker', [
+      const runResult = run('docker', [
         'run', '--rm', '-d', '--name', containerName,
         '-p', `127.0.0.1:${httpPort}:8080`,
         '-p', `127.0.0.1:${httpsPort}:8443`,
@@ -179,26 +181,30 @@ const dockerReady =
         '--health-start-period=0s',
         NGINX_IMAGE, '/usr/local/bin/entrypoint.sh'
       ], { timeout: 30000 });
-      if (runResult.status === 0) {
-        runFailures.length = 0;
-        break;
+      if (runResult.status !== 0) {
+        runFailures.push(`attempt ${attempt} (ports ${httpPort}/${httpsPort}) docker run: ${(runResult.stderr || '').trim()}`);
+        continue;
       }
-      runFailures.push(`attempt ${attempt} (ports ${httpPort}/${httpsPort}): ${(runResult.stderr || '').trim()}`);
+
+      const deadline = Date.now() + 30000;
+      let lastError;
+      while (Date.now() < deadline) {
+        const probe = health(true);
+        if (probe.status === 200) {
+          ready = true;
+          break;
+        }
+        lastError = probe;
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      if (!ready) {
+        runFailures.push(`attempt ${attempt} (ports ${httpPort}/${httpsPort}) readiness: HTTP listener never became ready; last probe exit=${lastError ? lastError.exit : 'n/a'}`);
+      }
     }
 
-    if (!runResult || runResult.status !== 0) {
-      throw new Error(`docker run failed:\n${runFailures.join('\n')}`);
+    if (!ready) {
+      throw new Error(`live listener startup failed:\n${runFailures.join('\n')}`);
     }
-
-    const deadline = Date.now() + 30000;
-    let lastError;
-    while (Date.now() < deadline) {
-      const attempt = health(true);
-      if (attempt.status === 200) return;
-      lastError = attempt;
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-    throw new Error(`HTTP listener never became ready; last probe exit=${lastError ? lastError.exit : 'n/a'}`);
   });
 
   afterAll(() => {

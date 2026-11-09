@@ -83,9 +83,32 @@ async function startContainer({ name, ports, workspace, certificates }) {
 }
 
 async function withContainer(options, callback) {
+  // The host Docker daemon is shared with other workers on this box, and a
+  // port that freePort() saw as free can still be held for a while by a
+  // just-removed container (or another worker's run) when docker tries to
+  // publish. Retry the whole publish on a fresh pair of ports, mirroring
+  // listenerContract.test.js; a deterministic failure (bad config) fails
+  // every attempt and surfaces with all daemon messages.
+  const runFailures = [];
+  let ports;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    ports = { http: await freePort(), https: await freePort() };
+    try {
+      await startContainer({ ...options, ports });
+      runFailures.length = 0;
+      break;
+    } catch (error) {
+      run('docker', ['rm', '-f', options.name], { timeout: 15000 });
+      runFailures.push(`attempt ${attempt} (ports ${ports.http}/${ports.https}): ${error.message}`);
+    }
+  }
+
+  if (runFailures.length > 0) {
+    throw new Error(`container startup failed:\n${runFailures.join('\n')}`);
+  }
+
   try {
-    await startContainer(options);
-    return await callback(options.ports);
+    return await callback(ports);
   } finally {
     run('docker', ['rm', '-f', options.name], { timeout: 15000 });
   }
@@ -120,7 +143,9 @@ describe('generated and replacement HTTPS certificates', () => {
 });
 
 (dockerReady ? describe : describe.skip)('live certificate replacement (requires Docker + cached nginx:alpine)', () => {
-  jest.setTimeout(90000);
+  // Budget for up to three publish-and-wait attempts per container (see
+  // withContainer), across the two containers this suite starts.
+  jest.setTimeout(240000);
 
   let workspace;
   let generatedCertificates;
@@ -148,10 +173,8 @@ describe('generated and replacement HTTPS certificates', () => {
   });
 
   test('serves the generated certificate, then presents the mounted replacement', async () => {
-    const generatedPorts = { http: await freePort(), https: await freePort() };
     const generatedSubject = await withContainer({
       name: `facedete-cert-generated-${process.pid}-${Date.now()}`,
-      ports: generatedPorts,
       workspace,
       certificates: generatedCertificates
     }, async (ports) => {
@@ -159,10 +182,8 @@ describe('generated and replacement HTTPS certificates', () => {
       return certificateSubject(ports.https);
     });
 
-    const replacementPorts = { http: await freePort(), https: await freePort() };
     const replacementSubject = await withContainer({
       name: `facedete-cert-replacement-${process.pid}-${Date.now()}`,
-      ports: replacementPorts,
       workspace,
       certificates: replacementCertificates
     }, async (ports) => {
