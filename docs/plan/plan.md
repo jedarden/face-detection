@@ -24,13 +24,14 @@ learning approaches) that predates this doc.
 - Public URL: **https://face.jedarden.com** (confirmed reachable 2026-07-20,
   HTTP 200, fronted by Cloudflare).
 - Runs on `ardenone-cluster`, namespace `face-detection`, single pod
-  `face-detection-*`, image `ghcr.io/jedarden/face-detection:2.0.5`.
-- Deployment manifest lives at
-  `k8s/ardenone-cluster/face-detection/face-detection-deployment.yml` in
-  `jedarden/declarative-config`, synced by the `face-detection` ArgoCD
-  Application on `ardenone-cluster` — this repo does not deploy itself. The
-  manifest must use an immutable semver release tag or a content digest;
-  `latest` is not valid.
+  `face-detection-*`, image
+  `ghcr.io/jedarden/face-detection@sha256:9f0361ea19d3ac70e0b891de136afe63517b4aeedcef82e58b303ff69c4d8f2c`.
+- Deployment source: the `declarative-config` repository manifest at
+  `k8s/ardenone-cluster/face-detection/face-detection-deployment.yml`.
+  ArgoCD Application `face-detection` syncs it to target cluster
+  `ardenone-cluster`, namespace `face-detection` — this repo does not deploy
+  itself. The production image must use an immutable semver release tag or
+  content digest; `:latest` is not valid.
 - `scripts/verify-deployment-image.sh` checks this plan or a supplied manifest
   and rejects mutable or untagged image references. The repository gate checks
   the plan and the [production release runbook](../operations/production-release.md);
